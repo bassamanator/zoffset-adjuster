@@ -44,10 +44,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         response.z_offset_signed()
     );
 
-    let file = fs::File::open(response.filename).expect("Failed to open file");
+    let file = fs::File::open(&response.filename).expect("Failed to open file");
     let reader = io::BufReader::new(file);
 
-    let out_file = fs::File::create("output.gcode")?;
+    let out_file = fs::File::create(response.get_output_filename())?;
     let mut writer = io::BufWriter::new(out_file);
 
     let insert_at = 4u8;
