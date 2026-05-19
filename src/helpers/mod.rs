@@ -86,7 +86,6 @@ impl ZOffsetAdjustmentParams {
     }
 
     pub fn revert_z_offset_code(&self) -> String {
-        // self.get_signed(self.z_offset * (-1 as f32));
         format!(
             "SET_GCODE_OFFSET Z_ADJUST={} MOVE=1",
             self.get_signed(self.z_offset * (-1 as f32))
