@@ -1,7 +1,7 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
-#![allow(unused_assignments)]
-#![allow(unused_must_use)]
+// #![allow(dead_code)]
+// #![allow(unused_variables)]
+// #![allow(unused_assignments)]
+// #![allow(unused_must_use)]
 mod helpers;
 mod tests;
 use colorize::AnsiColor;
@@ -31,7 +31,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             process::exit(1);
         }
     };
-    println!("{}", format!("{:#?}", response).yellow());
 
     let file = fs::File::open(&response.filename).expect("Failed to open file");
     let reader = io::BufReader::new(file);
@@ -56,9 +55,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ;Z:0.5
     // ;HEIGHT:0.12
 
-    let insert_at = 2u8;
-    let mut insert_at_line: Vec<u32> = vec![];
     let mut first_gcode_insertion = false;
+    let mut second_gcode_insertion = false;
 
     let mut was_as_layer_change = false;
     let mut was_as_current_z = false;
@@ -66,10 +64,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut locations: Vec<u32> = vec![];
     let mut layer_change_counter = 0u32;
 
-    let mut placeholder_count = 0u32;
-
     let mut capture_current_print_height: f32 = 0.0;
     let mut capture_current_layer_height: f32 = 0.0;
+
     for (current_line_position, line) in reader.lines().enumerate() {
         let line = line?;
 
@@ -79,20 +76,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             locations.push(current_line_position.try_into().unwrap());
         }
 
-        writeln!(writer, "{}", line);
+        let _ = writeln!(writer, "{}", line);
 
         if line.trim() == GCode::LAYER_CHANGE {
             was_as_layer_change = true;
-            // writeln!(writer, "{}", response.adjust_z_offset_code());
         }
         if line.contains(GCode::CURRENT_PRINT_HEIGHT) && was_as_layer_change {
             was_as_current_z = true;
             if let Some((_, value)) = line.split_once(':') {
                 capture_current_print_height = value.trim().parse().unwrap();
-                println!(
-                    "capture_current_print_height: {}",
-                    capture_current_print_height
-                );
             }
         }
 
@@ -102,34 +94,46 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             if let Some((_, value)) = line.split_once(':') {
                 capture_current_layer_height = value.trim().parse().unwrap();
-                println!(
-                    "capture_current_layer_height: {}",
-                    capture_current_layer_height
-                );
             }
             if !first_gcode_insertion {
                 first_gcode_insertion = true;
-                writeln!(writer, "{}", response.adjust_z_offset_code());
-                println!("{}", "write adjustment!".green());
+                let _ = writeln!(writer, "{}", response.adjust_z_offset_code());
+                println!(
+                    "\n{} {}",
+                    "Inserting z_offset adjustment at line".italic().b_magenta(),
+                    current_line_position + 1 + 1
+                );
             } else {
                 if capture_current_print_height == response.revert_z_offset_at_height() {
-                    writeln!(writer, "{}", response.revert_z_offset_code());
-                    println!("{}", "write revertion!".green());
+                    second_gcode_insertion = true;
+                    let _ = writeln!(writer, "{}", response.revert_z_offset_code());
+                    println!(
+                        "{} {}",
+                        "Inserting z_offset reversion at line".italic().b_magenta(),
+                        current_line_position + 1 + 1
+                    );
                 }
             }
-            // let v: u32 = current_line_position.try_into().unwrap();
-            // insert_at_line.push(v + 1);
         }
-
-        // NOTE for verification
-        // if line.contains(";Z:") {
-        //     if let Some((_, value)) = line.split_once(':') {
-        //         let z: f32 = value.trim().parse().unwrap();
-        //         println!("{}", z);
-        //     }
-        // }
     }
-    println!("{}", layer_change_counter);
-    println!("locations: {:?}", locations);
+    println!(
+        "{}",
+        format!("There were {} layer changes", layer_change_counter).magenta()
+    );
+    if !second_gcode_insertion {
+        println!(
+            "🚨 {}❌ {}{}",
+            "The z_offset reversion entry was never added.\n".red(),
+            "Do not use the generated gcode!\n".red(),
+            "⏰ The inputs were likely incorrect, try again.".yellow()
+        )
+    } else {
+        println!(
+            "\n{} {}",
+            response.get_output_filename().b_blue(),
+            "generated!".cyan()
+        );
+        println!("{}😀", "Goodbye! ".green());
+    }
     Ok(())
 }
