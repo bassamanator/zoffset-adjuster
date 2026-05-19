@@ -26,11 +26,11 @@ pub fn get_gcode_files() -> Result<Vec<path::PathBuf>, io::Error> {
 
 #[derive(Debug)]
 pub struct ZOffsetAdjustmentParams {
-    filename: String,
-    z_offset: f32,
-    first_layer_height: f32,
-    layer_height: f32,
-    revert_z_offset_at_layer: i32,
+    pub filename: String,
+    pub z_offset: f32,
+    pub first_layer_height: f32,
+    pub layer_height: f32,
+    pub revert_z_offset_at_layer: i32,
 }
 
 pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, InquireError> {

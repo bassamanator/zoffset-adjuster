@@ -1,8 +1,7 @@
 mod helpers;
 use colorize::AnsiColor;
 use inquire::InquireError;
-
-// use std::io::{self, BufRead};
+use std::io::{self, BufRead};
 use std::{fs, path, process};
 
 // fn main() -> io::Result<()> {
@@ -17,7 +16,7 @@ use std::{fs, path, process};
 //     Ok(())
 // }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Err(e) = fs::create_dir_all(path::Path::new(helpers::GCODE_DIR)) {
         eprintln!("Error creating directory '{}': {}", helpers::GCODE_DIR, e);
     }
@@ -28,27 +27,31 @@ fn main() {
         .map(|p| p.display().to_string())
         .collect();
 
-    let response = helpers::ask_user(gcodes_list);
-    match response {
-        Ok(choice) => {
-            // if choice == "Exit" {
-            //     exit_goodbye()
-            // }
-
-            let output_message = format!("{:?}", choice);
-            println!("{}", output_message.yellow());
+    let response = match helpers::ask_user(gcodes_list) {
+        Ok(choice) => choice,
+        Err(InquireError::OperationCanceled) => {
+            println!("{}😀", "Goodbye! ".blue());
+            process::exit(1);
         }
-        Err(err) => match err {
-            InquireError::OperationCanceled => exit_goodbye(),
-            _ => {
-                println!("{}", err);
-                process::exit(1);
-            }
-        },
-    }
-}
+        Err(err) => {
+            eprintln!("❌ {}", err);
+            process::exit(1);
+        }
+    };
 
-fn exit_goodbye() {
-    println!("{}😀", "Goodbye! ".blue());
-    process::exit(1);
+    println!("{}", format!("{:?}", response).yellow());
+
+    let file = fs::File::open(response.filename).expect("Failed to open file");
+    let reader = io::BufReader::new(file);
+
+    let mut count = 0i32;
+    for line in reader.lines() {
+        let line = line?;
+        // println!("{:?}", line);
+        if line.contains(";LAYER_CHANGE") {
+            count += 1;
+        }
+    }
+    println!("{}", count);
+    Ok(())
 }
