@@ -39,19 +39,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    println!("{}", format!("{:?}", response).yellow());
+    println!("{}", format!("{:#?}", response).yellow());
+    // response.
+    let adjustment_code_line = format!(
+        "SET_GCODE_OFFSET Z_ADJUST={} MOVE=1",
+        response.z_offset_signed()
+    );
+
+    println!("adjustment_code_line: {:?}", adjustment_code_line);
 
     let file = fs::File::open(response.filename).expect("Failed to open file");
     let reader = io::BufReader::new(file);
 
+    let mut locations: Vec<u32> = vec![];
     let mut count = 0i32;
-    for line in reader.lines() {
+    for (i, line) in reader.lines().enumerate() {
         let line = line?;
         // println!("{:?}", line);
         if line.contains(";LAYER_CHANGE") {
             count += 1;
+            locations.push(i.try_into().unwrap());
         }
     }
     println!("{}", count);
+    println!("locations: {:#?}", locations);
     Ok(())
 }

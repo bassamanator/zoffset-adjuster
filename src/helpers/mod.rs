@@ -33,6 +33,16 @@ pub struct ZOffsetAdjustmentParams {
     pub revert_z_offset_at_layer: i32,
 }
 
+impl ZOffsetAdjustmentParams {
+    pub fn z_offset_signed(&self) -> String {
+        if self.z_offset >= 0.0 {
+            format!("+{:.3}", self.z_offset)
+        } else {
+            format!("{:.3}", self.z_offset)
+        }
+    }
+}
+
 pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, InquireError> {
     let menu_options: Vec<&str> = vec!["Select a gcode file to adjust", "Exit"];
 
@@ -129,6 +139,6 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
         z_offset,
         first_layer_height,
         layer_height,
-        revert_z_offset_at_layer: at_what_layer_to_revert_z_offset,
+        revert_z_offset_at_layer: at_what_layer_to_revert_z_offset - 1,
     })
 }
