@@ -41,6 +41,11 @@ impl ZOffsetAdjustmentParams {
             format!("{:.3}", self.z_offset)
         }
     }
+    pub fn get_output_filename(&self) -> String {
+        let parts: Vec<&str> = self.filename.split(".gcode").collect();
+        let new = format!("{}-{}.gcode", parts[0], get_timestamp(),);
+        return new;
+    }
 }
 
 pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, InquireError> {
@@ -141,4 +146,11 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
         layer_height,
         revert_z_offset_at_layer: at_what_layer_to_revert_z_offset - 1,
     })
+}
+
+fn get_timestamp() -> String {
+    chrono::Local::now()
+        .format("%I%M%S")
+        .to_string()
+        .to_uppercase()
 }
