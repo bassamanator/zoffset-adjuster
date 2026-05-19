@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 inquire = "0.9.4"
+colorize = "0.1.0"
