@@ -1,4 +1,4 @@
-use inquire::{CustomType, InquireError, Select, Text, validator::Validation};
+use inquire::{CustomType, InquireError, Select, validator::Validation};
 
 use std::{fs, io, path};
 
@@ -30,7 +30,7 @@ pub struct ZOffsetAdjustmentParams {
     pub z_offset: f32,
     pub first_layer_height: f32,
     pub layer_height: f32,
-    pub revert_z_offset_at_layer: i32,
+    pub revert_z_offset_at_layer: u32,
 }
 
 impl ZOffsetAdjustmentParams {
@@ -39,7 +39,7 @@ impl ZOffsetAdjustmentParams {
         z_offset: f32,
         first_layer_height: f32,
         layer_height: f32,
-        revert_z_offset_at_layer: i32,
+        revert_z_offset_at_layer: u32,
     ) -> Self {
         Self {
             filename,
@@ -57,6 +57,15 @@ impl ZOffsetAdjustmentParams {
             format!("{:.3}", self.z_offset)
         }
     }
+
+    fn get_signed(&self, value: f32) -> String {
+        if value >= 0.0 {
+            format!("+{:.3}", value)
+        } else {
+            format!("{:.3}", value)
+        }
+    }
+
     pub fn get_output_filename(&self) -> String {
         let parts: Vec<&str> = self.filename.split(".gcode").collect();
         let new = format!("{}-{}.gcode", parts[0], get_timestamp(),);
@@ -67,6 +76,21 @@ impl ZOffsetAdjustmentParams {
         let result = ((self.revert_z_offset_at_layer - 1) as f32) * self.layer_height
             + self.first_layer_height;
         (result * 1000.0).round() / 1000.0 // round to 3 decimal places
+    }
+
+    pub fn adjust_z_offset_code(&self) -> String {
+        format!(
+            "SET_GCODE_OFFSET Z_ADJUST={} MOVE=1",
+            self.z_offset_signed()
+        )
+    }
+
+    pub fn revert_z_offset_code(&self) -> String {
+        // self.get_signed(self.z_offset * (-1 as f32));
+        format!(
+            "SET_GCODE_OFFSET Z_ADJUST={} MOVE=1",
+            self.get_signed(self.z_offset * (-1 as f32))
+        )
     }
 }
 
@@ -137,14 +161,14 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
         })
         .prompt()?;
 
-    let at_what_layer_to_revert_z_offset = CustomType::<i32>::new(
+    let at_what_layer_to_revert_z_offset = CustomType::<u32>::new(
         "At the start of what layer do you want to undo the Z offset adjustment?",
     )
     .with_starting_input("2")
     .with_formatter(&|i| format!("{i}"))
     .with_error_message("Please type a valid integer")
     .with_help_message("Enter an integer 2 or greater")
-    .with_validator(|val: &i32| {
+    .with_validator(|val: &u32| {
         if *val < 2 {
             Ok(Validation::Invalid("Value must be 2 or greater".into()))
         } else {
