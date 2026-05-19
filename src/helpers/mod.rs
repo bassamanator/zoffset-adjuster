@@ -34,6 +34,22 @@ pub struct ZOffsetAdjustmentParams {
 }
 
 impl ZOffsetAdjustmentParams {
+    pub fn new(
+        filename: String,
+        z_offset: f32,
+        first_layer_height: f32,
+        layer_height: f32,
+        revert_z_offset_at_layer: i32,
+    ) -> Self {
+        Self {
+            filename,
+            z_offset,
+            first_layer_height,
+            layer_height,
+            revert_z_offset_at_layer,
+        }
+    }
+
     pub fn z_offset_signed(&self) -> String {
         if self.z_offset >= 0.0 {
             format!("+{:.3}", self.z_offset)
@@ -44,15 +60,18 @@ impl ZOffsetAdjustmentParams {
     pub fn get_output_filename(&self) -> String {
         let parts: Vec<&str> = self.filename.split(".gcode").collect();
         let new = format!("{}-{}.gcode", parts[0], get_timestamp(),);
-        return new;
+        new
+    }
+
+    pub fn revert_z_offset_at_height(&self) -> f32 {
+        let result = ((self.revert_z_offset_at_layer - 1) as f32) * self.layer_height
+            + self.first_layer_height;
+        (result * 1000.0).round() / 1000.0 // round to 3 decimal places
     }
 }
 
 pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, InquireError> {
     let menu_options: Vec<&str> = vec!["Select a gcode file to adjust", "Exit"];
-
-    // let response: Result<&str, InquireError> =
-    //     Ok(inquire::Select::new("What would you like to do?", menu_options).prompt()?);
 
     let filename = Select::new("Select a gcode file", gcodes_list).prompt()?;
 
@@ -144,7 +163,7 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
         z_offset,
         first_layer_height,
         layer_height,
-        revert_z_offset_at_layer: at_what_layer_to_revert_z_offset - 1,
+        revert_z_offset_at_layer: at_what_layer_to_revert_z_offset,
     })
 }
 
