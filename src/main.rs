@@ -2,6 +2,14 @@ mod helpers;
 use std::io::{self, BufRead};
 use std::{fs, path};
 
+use inquire::InquireError;
+use inquire::{
+    CustomType, MultiSelect, Select, Text,
+    error::{CustomUserError, InquireResult},
+    required,
+    ui::RenderConfig,
+};
+
 // fn main() -> io::Result<()> {
 //     let file = fs::File::open("top-left_Overture PLA+ Pro - Grey Blue_1h59m-OS.gcode")?;
 //     let reader = io::BufReader::new(file);
@@ -20,8 +28,19 @@ fn main() {
     if let Err(e) = fs::create_dir_all(path::Path::new(GCODE_DIR)) {
         eprintln!("Error creating directory '{}': {}", GCODE_DIR, e);
     }
-    let gcodes = get_gcode_files();
-    println!("gcodes: {:?}", gcodes);
+    let gcodes_list: Vec<path::PathBuf> = get_gcode_files().expect("Failed to get gcode list");
+    let gcodes_list: Vec<String> = gcodes_list
+        .iter()
+        .map(|p| p.display().to_string())
+        .collect();
+    println!("gcodes: {:?}", gcodes_list);
+
+    let selected_file = Select::new("Select a gcode file", gcodes_list).prompt();
+
+    match selected_file {
+        Ok(file) => println!("Selected: {:?}", file),
+        Err(_) => println!("There was an error or the user canceled"),
+    }
 }
 
 fn get_gcode_files() -> Result<Vec<path::PathBuf>, io::Error> {
@@ -30,7 +49,6 @@ fn get_gcode_files() -> Result<Vec<path::PathBuf>, io::Error> {
             // Map over directory entries, returning None if there's an error
             result.ok().and_then(|e| {
                 let path = e.path();
-                // Only include files, files with a .gcode extension
                 if path.is_file()
                     && path.extension().and_then(|ext| ext.to_str()) == Some(GCODE_EXT)
                 {
