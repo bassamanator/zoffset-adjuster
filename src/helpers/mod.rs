@@ -94,8 +94,6 @@ impl ZOffsetAdjustmentParams {
 }
 
 pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, InquireError> {
-    let menu_options: Vec<&str> = vec!["Select a gcode file to adjust", "Exit"];
-
     let filename = Select::new("Select a gcode file", gcodes_list).prompt()?;
 
     let z_offset_min: f32 = -0.400;
@@ -176,18 +174,13 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
     })
     .prompt()?;
 
-    // println!("Selected: {:?}", selected_file);
-    // match selected_file {
-    //     Ok(file) => println!("Selected: {:?}", file),
-    //     Err(_) => println!("There was an error or the user canceled"),
-    // }
-    Ok(ZOffsetAdjustmentParams {
+    Ok(ZOffsetAdjustmentParams::new(
         filename,
         z_offset,
         first_layer_height,
         layer_height,
-        revert_z_offset_at_layer: at_what_layer_to_revert_z_offset,
-    })
+        at_what_layer_to_revert_z_offset,
+    ))
 }
 
 fn get_timestamp() -> String {

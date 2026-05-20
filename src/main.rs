@@ -65,7 +65,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut layer_change_counter = 0u32;
 
     let mut capture_current_print_height: f32 = 0.0;
-    let mut capture_current_layer_height: f32 = 0.0;
+    // let mut capture_current_layer_height: f32 = 0.0;
 
     for (current_line_position, line) in reader.lines().enumerate() {
         let line = line?;
@@ -92,9 +92,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             was_as_layer_change = false;
             was_as_current_z = false;
 
-            if let Some((_, value)) = line.split_once(':') {
-                capture_current_layer_height = value.trim().parse().unwrap();
-            }
+            // if let Some((_, value)) = line.split_once(':') {
+            //     capture_current_layer_height = value.trim().parse().unwrap();
+            // }
             if !first_gcode_insertion {
                 first_gcode_insertion = true;
                 let _ = writeln!(writer, "{}", response.adjust_z_offset_code());
