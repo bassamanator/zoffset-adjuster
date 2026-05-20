@@ -10,6 +10,33 @@ use std::io::{self, BufRead, Write};
 use std::{fs, path, process};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let gcode_dir = path::Path::new(helpers::GCODE_DIR);
+
+    if !gcode_dir.exists() {
+        match fs::create_dir_all(gcode_dir) {
+            Ok(_) => {
+                println!(
+                    "{}",
+                    format!("Created missing directory: {}", helpers::GCODE_DIR).green()
+                );
+                println!(
+                    "{}",
+                    format!("But it cannot be empty.\nPlease add a gcode file, and start again.",)
+                        .yellow()
+                );
+                println!("{}😀", "Goodbye! ".blue());
+                process::exit(0)
+            }
+            Err(e) => {
+                eprintln!(
+                    "❌ Error creating directory '{}': {}",
+                    helpers::GCODE_DIR,
+                    e
+                );
+                process::exit(0)
+            }
+        }
+    }
     if let Err(e) = fs::create_dir_all(path::Path::new(helpers::GCODE_DIR)) {
         eprintln!("Error creating directory '{}': {}", helpers::GCODE_DIR, e);
     }
@@ -19,6 +46,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .iter()
         .map(|p| p.display().to_string())
         .collect();
+
+    if gcodes_list.len() == 0 {
+        println!(
+            "{}",
+            format!(
+                "The gcode directory cannot be empty.\nPlease add a gcode file, and start again.",
+            )
+            .yellow()
+        );
+        println!("{}😀", "Goodbye! ".blue());
+        process::exit(0)
+    }
 
     let response = match helpers::ask_user(gcodes_list) {
         Ok(choice) => choice,
