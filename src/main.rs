@@ -57,7 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok(choice) => choice,
         Err(InquireError::OperationCanceled) => {
             println!("{}😀", "Goodbye! ".blue());
-            process::exit(1);
+            process::exit(0);
         }
         Err(err) => {
             eprintln!("❌ {}", err);
@@ -74,9 +74,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     struct GCode;
     impl GCode {
         const LAYER_CHANGE: &'static str = ";LAYER_CHANGE";
-        const CURRENT_PRINT_HEIGHT: &'static str = ";Z:"; // NOTE the print is now at this height
-        const CURRENT_LAYER_HEIGHT: &'static str = ";HEIGHT:"; // NOTE print height of the current layer
+        const CURRENT_PRINT_HEIGHT: &'static str = ";Z:";
+        const CURRENT_LAYER_HEIGHT: &'static str = ";HEIGHT:";
     }
+    // NOTE example
     // first layer height: 0.26
     // layer height: 0.10
     // NOTE first layer
@@ -98,7 +99,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut layer_change_counter = 0u32;
 
     let mut capture_current_print_height: f32 = 0.0;
-    // let mut capture_current_layer_height: f32 = 0.0;
 
     for (current_line_position, line) in reader.lines().enumerate() {
         let line = line?;
@@ -125,9 +125,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             was_as_layer_change = false;
             was_as_current_z = false;
 
-            // if let Some((_, value)) = line.split_once(':') {
-            //     capture_current_layer_height = value.trim().parse().unwrap();
-            // }
             if !first_gcode_insertion {
                 first_gcode_insertion = true;
                 let _ = writeln!(writer, "{}", response.adjust_z_offset_code());
@@ -149,6 +146,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
+
     println!(
         "{}",
         format!("There were {} layer changes", layer_change_counter).magenta()

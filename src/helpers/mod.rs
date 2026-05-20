@@ -50,7 +50,7 @@ impl ZOffsetAdjustmentParams {
         }
     }
 
-    pub fn z_offset_signed(&self) -> String {
+    fn z_offset_signed(&self) -> String {
         if self.z_offset >= 0.0 {
             format!("+{:.3}", self.z_offset)
         } else {
