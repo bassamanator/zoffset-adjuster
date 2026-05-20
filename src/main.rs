@@ -1,7 +1,3 @@
-// #![allow(dead_code)]
-// #![allow(unused_variables)]
-// #![allow(unused_assignments)]
-// #![allow(unused_must_use)]
 mod helpers;
 mod tests;
 use colorize::AnsiColor;
@@ -37,9 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
-    if let Err(e) = fs::create_dir_all(path::Path::new(helpers::GCODE_DIR)) {
-        eprintln!("Error creating directory '{}': {}", helpers::GCODE_DIR, e);
-    }
+
     let gcodes_list: Vec<path::PathBuf> =
         helpers::get_gcode_files().expect("Failed to get gcode list");
     let gcodes_list: Vec<String> = gcodes_list
