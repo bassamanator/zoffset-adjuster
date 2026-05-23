@@ -1,22 +1,29 @@
+<!-- markdownlint-disable MD041 MD028 MD040-->
+
 > [!CAUTION]
 > You can damage your 3d printer if not used correctly!
 
 > [!WARNING]
 > I am creating these files for my personal use and cannot be held responsible for what it might do to your printer. Use at your own risk.
 
-## What
+# zoffset-adjuster
 
 Adjusts the `z_offset` in gcode files for early layers. E.g., if you prefer more layer squish for the first layer, and then normal layer squish for subsequent layers.
 
-This is especially useful for users with a warped bed, or with a bed that has poor layer squish in particular spots.
+This is especially useful for users with a warped bed, or with a bed that has poor layer squish, or adhesion, in particular spots.
+
+Run with `--help` for more information.
 
 ## How
 
-Inserts `SET_GCODE_OFFSET Z_ADJUST={VALUE} MOVE=1` before starting the first layer, and then `SET_GCODE_OFFSET Z_ADJUST={OPPOSITE_VALUE} MOVE=1` at the requested layer.
+1. Inserts `SET_GCODE_OFFSET Z_ADJUST={VALUE} MOVE=1` before starting the **first layer**.
+    - Both positive and negative values are acceptable.
+1. Inserts `SET_GCODE_OFFSET Z_ADJUST={OPPOSITE_VALUE} MOVE=1` at the requested layer.
+    - Requested layer can be anything from 2 to the last layer.
 
 ## Usage
 
-```shell
+```
 ./zoffset-adjuster
 
 ./zoffset-adjuster --help
@@ -30,7 +37,7 @@ Inserts `SET_GCODE_OFFSET Z_ADJUST={VALUE} MOVE=1` before starting the first lay
 
 In this example, a `cube` was sliced with `first layer height: 0.22 mm` and `layer height: 0.12 mm`. I prefer more layer squish only on the first layer, so the `z_offset` adjustment will be reverted, undone, at layer 2.
 
-```shell
+```
 ➜ ./zoffset-adjuster ./Cube.gcode 
 > Selected file: ./Cube.gcode
 > How much to adjust z_offset by? -0.015 mm

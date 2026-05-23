@@ -8,9 +8,15 @@ use std::{fs, path, process};
 
 #[derive(Parser)]
 #[command(name = "zoffset-adjuster")]
-#[command(about = "Adjusts z offset in gcode files for early layers.")]
+#[command(about = "Adjusts the `z_offset` in gcode files for early layers.")]
 #[command(
-    long_about = "Adjusts z offset in gcode files for early layers. E.g., if you prefer more\nlayer squish for the first layer, and then normal layer squish for subsequent\nlayers. This is especially useful for users with a warped bed, or with a bed\nthat poor layer squish in particular spots consistently."
+    long_about = "Adjusts the `z_offset` in gcode files for early layers. E.g., if you prefer more\nlayer squish for the first layer, and then normal layer squish for subsequent layers.
+
+This is especially useful for users with a warped bed, or with a bed that has poor layer\nsquish, or adhesion, in particular spots.
+
+Negative (-) values lower the nozzle, reducing the gap between the nozzle and the bed,\nresulting in `more` layer squish.
+Positive (+) values elevate the nozzle, increasing the gap between the nozzle and the bed,\nresulting in `less` layer squish.
+"
 )]
 struct Args {
     /// Path to gcode file
