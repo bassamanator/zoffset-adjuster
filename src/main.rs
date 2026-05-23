@@ -52,7 +52,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!(
             "{}\n{}",
             "❌ No gcode file provided and none were found in the current directory".red(),
-            "🗒️  Run this program with `--help` for instructions.".yellow(),
+            "🗒️ Run this program with `--help` for instructions.".yellow(),
         );
         println!("{}😀", "Goodbye! ".green());
         process::exit(0)
