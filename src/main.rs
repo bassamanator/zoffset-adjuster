@@ -48,6 +48,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         gcodes_list = helpers::get_gcode_files().expect("Failed to get gcode list");
     }
 
+    if gcodes_list.len() == 0 {
+        println!(
+            "{}\n{}",
+            "❌ No gcode file provided and none were found in the current directory".red(),
+            "🗒️  Run this program with `--help` for instructions.".yellow(),
+        );
+        println!("{}😀", "Goodbye! ".green());
+        process::exit(0)
+    }
+
     let response: helpers::ZOffsetAdjustmentParams = match helpers::ask_user(gcodes_list) {
         Ok(choice) => choice,
         Err(InquireError::OperationCanceled) => {
@@ -131,15 +141,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     if !second_gcode_insertion || !first_gcode_insertion {
-        println!(
-            "\n🚨 {}❌ {}{}",
-            "The z_offset adjustment and, or, reversion entry was never added.\n".red(),
-            "Do not use the generated gcode!\n".red(),
-            "🤔 The inputs were likely incorrect, double check them and try again.".yellow()
-        );
         drop(writer);
         let new_path = out_path.replace(".gcode", "-DO-NOT-USE.gcode");
         fs::rename(&out_path, &new_path)?;
+        println!(
+            "\n🚨 {}❌ {} {}\n{}",
+            "The z_offset adjustment and, or, reversion entry was never added.\n".red(),
+            "Do not use the generated gcode!".red(),
+            new_path.b_blue(),
+            "🤔 The inputs were likely incorrect, double check them and try again.".yellow()
+        );
     } else {
         println!("\n{} {}", out_path.b_blue(), "generated!".cyan());
         println!("{}😀", "Goodbye! ".green());
