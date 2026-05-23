@@ -1,7 +1,7 @@
 use colorize::AnsiColor;
 use inquire::{CustomType, InquireError, Select, validator::Validation};
 
-use std::{fs, io, path};
+use std::{fs, io};
 
 pub const GCODE_DIR: &str = "./";
 pub const GCODE_EXT: &str = "gcode";
@@ -9,7 +9,6 @@ pub const GCODE_EXT: &str = "gcode";
 pub fn get_gcode_files() -> Result<Vec<String>, io::Error> {
     let gcode_files = fs::read_dir(GCODE_DIR)?
         .filter_map(|result| {
-            // Map over directory entries, returning None if there's an error
             result.ok().and_then(|e| {
                 let path = e.path();
                 if path.is_file()
@@ -102,15 +101,13 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
         println!(
             "{} {} {}",
             format!(">").faint(),
-            format!("Filename: ").cyan(),
-            gcodes_list[0]
+            format!("Selected file:"),
+            format!("{}", gcodes_list[0]).cyan()
         );
         gcodes_list[0].clone()
     } else {
         Select::new("Select a gcode file", gcodes_list).prompt()?
     };
-
-    // let filename = Select::new("Select a gcode file", gcodes_list).prompt()?;
 
     let z_offset_min: f32 = -0.400;
     let z_offset_max: f32 = 0.400;

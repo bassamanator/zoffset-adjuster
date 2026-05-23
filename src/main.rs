@@ -10,14 +10,14 @@ use std::{fs, path, process};
 #[command(name = "zoffset-adjuster")]
 #[command(about = "Adjusts z offset in gcode files for early layers.")]
 #[command(
-    long_about = "Adjusts z offset in gcode files for early layers. E.g., if you prefer more\nlayer squish for the first layer, and then normal layer squish for subsequent\nlayers. This is especially usefull for users with a warped bed, or with a bed\nthat poor layer squish in particular spots consistently."
+    long_about = "Adjusts z offset in gcode files for early layers. E.g., if you prefer more\nlayer squish for the first layer, and then normal layer squish for subsequent\nlayers. This is especially useful for users with a warped bed, or with a bed\nthat poor layer squish in particular spots consistently."
 )]
 struct Args {
-    /// Path to gcode file (positional)
+    /// Path to gcode file
     #[arg(index = 1)]
     file: Option<String>,
 
-    /// Path to gcode file (flag)
+    /// Path to gcode file
     #[arg(short, long)]
     input: Option<String>,
 }
@@ -151,16 +151,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         format!("There were {} layer changes", layer_change_counter).magenta()
     );
 
-    // let out_file = fs::File::create(response.get_output_filename())?;
-
     if !second_gcode_insertion || !first_gcode_insertion {
         println!(
-            "🚨 {}❌ {}{}",
+            "\n🚨 {}❌ {}{}",
             "The z_offset adjustment and, or, reversion entry was never added.\n".red(),
             "Do not use the generated gcode!\n".red(),
             "⏰ The inputs were likely incorrect, try again.".yellow()
         );
-        drop(writer); // close the file before renaming
+        drop(writer);
         let new_path = out_path.replace(".gcode", "-DO-NOT-USE.gcode");
         fs::rename(&out_path, &new_path)?;
     } else {
