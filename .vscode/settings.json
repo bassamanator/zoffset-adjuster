@@ -1,0 +1,10 @@
+{
+	"cSpell.enabledFileTypes": {
+		"rust": true,
+	},
+	"cSpell.words": [
+		"gcode",
+		"gcodes",
+		"zoffset"
+	],
+}
