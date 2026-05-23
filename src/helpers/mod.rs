@@ -177,7 +177,7 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
     .with_starting_input("2")
     .with_formatter(&|i| format!("{i}"))
     .with_error_message("Please type a valid integer")
-    .with_help_message("Enter an integer 2 or greater")
+    .with_help_message("Enter an integer value greater than 2")
     .with_validator(|val: &u32| {
         if *val < 2 {
             Ok(Validation::Invalid("Value must be 2 or greater".into()))

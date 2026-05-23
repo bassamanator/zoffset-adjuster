@@ -26,7 +26,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     let file = args.input.or(args.file);
 
-    let file: Option<std::path::PathBuf> = match file {
+    let file = match file {
         Some(f) => {
             let p = path::Path::new(&f);
             if !(p.is_file()
@@ -35,16 +35,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("❌ Invalid input. Only `.gcode` files are permissible.");
                 process::exit(0)
             }
-            Some(p.to_path_buf())
+            Some(f)
         }
         None => None,
     };
 
-    // let mut response: helpers::ZOffsetAdjustmentParams;
     let mut gcodes_list: Vec<String> = vec![];
 
     if let Some(file) = &file {
-        gcodes_list.push(file.display().to_string());
+        gcodes_list.push(file.to_string());
     } else {
         gcodes_list = helpers::get_gcode_files().expect("Failed to get gcode list");
     }
@@ -66,7 +65,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let out_path = response.get_output_filename();
     let out_file = fs::File::create(&out_path)?;
-    // let out_file = fs::File::create(response.get_output_filename())?;
     let mut writer = io::BufWriter::new(out_file);
 
     struct GCode;
@@ -75,17 +73,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         const CURRENT_PRINT_HEIGHT: &'static str = ";Z:";
         const CURRENT_LAYER_HEIGHT: &'static str = ";HEIGHT:";
     }
-    // NOTE example sequence found in OS 2.3.2
-    // first layer height: 0.26
-    // layer height: 0.10
-    // NOTE first layer
-    // ;LAYER_CHANGE
-    // ;Z:0.26
-    // ;HEIGHT:0.26
-    // NOTE third layer
-    // ;LAYER_CHANGE
-    // ;Z:0.5
-    // ;HEIGHT:0.12
 
     let mut first_gcode_insertion = false;
     let mut second_gcode_insertion = false;
@@ -93,16 +80,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut was_as_layer_change = false;
     let mut was_as_current_z = false;
 
-    let mut layer_change_counter = 0u32;
-
     let mut capture_current_print_height: f32 = 0.0;
 
     for (current_line_position, line) in reader.lines().enumerate() {
+        let inserting_cmd_at_line = current_line_position + 1 + 1;
+        let inserting_2nd_cmd_at_line = current_line_position + 1 + 1 + 1;
         let line = line?;
-
-        if line.trim() == GCode::LAYER_CHANGE {
-            layer_change_counter += 1;
-        }
 
         let _ = writeln!(writer, "{}", line);
 
@@ -130,33 +113,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!(
                     "\n{} {}",
                     "Inserting z_offset adjustment at line".italic().b_magenta(),
-                    current_line_position + 1 + 1
+                    inserting_cmd_at_line
                 );
             } else {
+                // NOTE is the current print height where the reversion should be inserted at?
                 if capture_current_print_height == response.revert_z_offset_at_height() {
                     second_gcode_insertion = true;
                     let _ = writeln!(writer, "{}", response.revert_z_offset_code());
                     println!(
                         "{} {}",
                         "Inserting z_offset reversion at line".italic().b_magenta(),
-                        current_line_position + 1 + 1
+                        inserting_2nd_cmd_at_line
                     );
                 }
             }
         }
     }
 
-    println!(
-        "{}",
-        format!("There were {} layer changes", layer_change_counter).magenta()
-    );
-
     if !second_gcode_insertion || !first_gcode_insertion {
         println!(
             "\n🚨 {}❌ {}{}",
             "The z_offset adjustment and, or, reversion entry was never added.\n".red(),
             "Do not use the generated gcode!\n".red(),
-            "⏰ The inputs were likely incorrect, try again.".yellow()
+            "🤔 The inputs were likely incorrect, double check them and try again.".yellow()
         );
         drop(writer);
         let new_path = out_path.replace(".gcode", "-DO-NOT-USE.gcode");
