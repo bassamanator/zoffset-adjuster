@@ -2,6 +2,7 @@ mod helpers;
 mod tests;
 use clap::Parser;
 use colorize::AnsiColor;
+use env_logger::Env;
 use inquire::InquireError;
 use std::io::{self, BufRead, Write};
 use std::{fs, path, process};
@@ -29,6 +30,13 @@ struct Args {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let env = Env::default()
+        .filter_or("RUST_LOG", "off")
+        .write_style_or("MY_LOG_STYLE", "always");
+
+    env_logger::init_from_env(env);
+
+    // helpers::save_settings();
     let args = Args::parse();
     let file = args.input.or(args.file);
 
