@@ -105,6 +105,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut was_as_current_z = false;
 
     let mut capture_current_print_height: f32 = 0.0;
+    let mut layer_counter: u32 = 0;
 
     for (current_line_position, line) in reader.lines().enumerate() {
         let inserting_cmd_at_line = current_line_position + 1 + 1;
@@ -115,6 +116,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // NOTE first cue
         if line.trim() == GCode::LAYER_CHANGE {
+            layer_counter += 1;
             was_as_layer_change = true;
         }
 
@@ -131,7 +133,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             was_as_layer_change = false;
             was_as_current_z = false;
 
-            if !first_gcode_insertion {
+            if !first_gcode_insertion && capture_current_print_height == response.first_layer_height
+            {
                 first_gcode_insertion = true;
                 let _ = writeln!(writer, "{}", response.adjust_z_offset_code());
                 println!(
@@ -141,7 +144,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 );
             } else {
                 // NOTE is the current print height where the reversion should be inserted at?
-                if capture_current_print_height == response.revert_z_offset_at_height() {
+                if capture_current_print_height == response.revert_z_offset_at_height()
+                    && layer_counter == response.revert_z_offset_at_layer
+                {
                     second_gcode_insertion = true;
                     let _ = writeln!(writer, "{}", response.revert_z_offset_code());
                     println!(
