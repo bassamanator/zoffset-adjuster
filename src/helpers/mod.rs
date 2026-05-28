@@ -7,6 +7,10 @@ use std::{fs, io};
 const SETTINGS_FILE: &str = "./settings.toml";
 pub const GCODE_DIR: &str = "./";
 pub const GCODE_EXT: &str = "gcode";
+pub const Z_OFFSET_MIN: f32 = -0.400;
+pub const Z_OFFSET_MAX: f32 = 0.400;
+pub const LAYER_HEIGHT_MIN: f32 = 0.0;
+pub const LAYER_HEIGHT_MAX: f32 = 0.5;
 
 pub fn get_gcode_files() -> Result<Vec<String>, io::Error> {
     let gcode_files = fs::read_dir(GCODE_DIR)?
@@ -175,9 +179,6 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
         Select::new("Select a gcode file", gcodes_list).prompt()?
     };
 
-    let z_offset_min: f32 = -0.400;
-    let z_offset_max: f32 = 0.400;
-
     let z_offset = CustomType::<f32>::new("How much to adjust z_offset by?")
         .with_starting_input(&settings.z_offset.to_string())
         // .with_starting_input("-0.015")
@@ -185,18 +186,15 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
         .with_error_message("Please type a valid number")
         .with_help_message("Range: -0.400 to +0.400.\n E.g., +0.01, 0.012, -0.015, etc.\n Note: negative values lower the nozzle.")
         .with_validator(move |val: &f32| {
-            if *val < z_offset_min {
-                Ok(Validation::Invalid(format!("Value must be greater than {z_offset_min}").into()))
-            } else if *val > z_offset_max {
-                Ok(Validation::Invalid(format!("Value must be less than {z_offset_max}").into()))
+            if *val < Z_OFFSET_MIN {
+                Ok(Validation::Invalid(format!("Value must be greater than {Z_OFFSET_MIN}").into()))
+            } else if *val > Z_OFFSET_MAX {
+                Ok(Validation::Invalid(format!("Value must be less than {Z_OFFSET_MAX}").into()))
             } else {
                 Ok(Validation::Valid)
             }
         })
         .prompt()?;
-
-    let layer_height_max: f32 = 0.5;
-    let layer_height_min: f32 = 0.0;
 
     let first_layer_height = CustomType::<f32>::new("What is the height of the first layer?")
         .with_starting_input(&settings.first_layer_height.to_string())
@@ -205,13 +203,13 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
         .with_error_message("Please type a valid number")
         .with_help_message("E.g., 0.2, 0.26, 0.3, etc.")
         .with_validator(move |val: &f32| {
-            if *val > layer_height_max {
+            if *val > LAYER_HEIGHT_MAX {
                 Ok(Validation::Invalid(
-                    format!("Value must be less than {layer_height_max}").into(),
+                    format!("Value must be less than {LAYER_HEIGHT_MAX}").into(),
                 ))
-            } else if *val < layer_height_min {
+            } else if *val < LAYER_HEIGHT_MIN {
                 Ok(Validation::Invalid(
-                    format!("Value must be greater than {layer_height_min} mm").into(),
+                    format!("Value must be greater than {LAYER_HEIGHT_MIN} mm").into(),
                 ))
             } else {
                 Ok(Validation::Valid)
@@ -226,13 +224,13 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
         .with_error_message("Please type a valid number")
         .with_help_message("E.g., 0.2, 0.26, 0.3, etc.")
         .with_validator(move |val: &f32| {
-            if *val > layer_height_max {
+            if *val > LAYER_HEIGHT_MAX {
                 Ok(Validation::Invalid(
-                    format!("Value must be less than {layer_height_max}").into(),
+                    format!("Value must be less than {LAYER_HEIGHT_MAX}").into(),
                 ))
-            } else if *val < layer_height_min {
+            } else if *val < LAYER_HEIGHT_MIN {
                 Ok(Validation::Invalid(
-                    format!("Value must be greater than {layer_height_min} mm").into(),
+                    format!("Value must be greater than {LAYER_HEIGHT_MIN} mm").into(),
                 ))
             } else {
                 Ok(Validation::Valid)
