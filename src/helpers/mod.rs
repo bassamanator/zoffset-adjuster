@@ -43,7 +43,7 @@ pub struct Settings {
 
 impl Default for Settings {
     fn default() -> Self {
-        Settings {
+        Self {
             z_offset: -0.015,
             first_layer_height: 0.26,
             layer_height: 0.2,
@@ -81,7 +81,7 @@ pub fn load_settings() -> Settings {
         },
     };
 
-    match toml::from_str::<Settings>(&content) {
+    match toml::from_str::<Settings>(content.as_str()) {
         Ok(t) => t,
         Err(e) => {
             eprintln!(

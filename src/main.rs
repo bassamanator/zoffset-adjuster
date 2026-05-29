@@ -7,7 +7,8 @@ use inquire::InquireError;
 use std::io::{self, BufRead, Write};
 use std::{fs, path, process};
 
-#[derive(Parser)]
+#[derive(Parser, Debug)]
+// #[command(allow_negative_numbers = true)]
 #[command(name = "zoffset-adjuster")]
 #[command(about = "Adjusts the `z_offset` in gcode files for early layers.")]
 #[command(
@@ -27,6 +28,27 @@ struct Args {
     /// Path to gcode file
     #[arg(short, long)]
     input: Option<String>,
+
+    /// Silent mode (no prompts, uses defaults or provided CLI args)
+    #[arg(short, long)]
+    silent: bool,
+
+    /// Z offset adjustment
+    #[arg(short, long)]
+    z_offset: Option<f32>,
+
+    /// First layer height
+    // #[arg(short, long, value_parser = positive_float )]
+    #[arg(short, long)]
+    first_layer_height: Option<f32>,
+
+    /// Layer height
+    #[arg(short, long)]
+    layer_height: Option<f32>,
+
+    /// Revert z_offset at layer
+    #[arg(short, long)]
+    revert_z_offset_at_layer: Option<u32>,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -36,11 +58,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     env_logger::init_from_env(env);
 
-    // helpers::save_settings();
     let args = Args::parse();
-    let file = args.input.or(args.file);
+    println!("args: {:#?}", args);
 
-    let file = match file {
+    let file = args.input.or(args.file);
+    let file: Option<String> = match file {
         Some(f) => {
             let p = path::Path::new(&f);
             if !(p.is_file()
@@ -54,36 +76,66 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         None => None,
     };
 
-    let mut gcodes_list: Vec<String> = vec![];
+    let response: helpers::ZOffsetAdjustmentParams;
+    let settings = helpers::load_settings();
 
-    if let Some(file) = &file {
-        gcodes_list.push(file.to_string());
+    if args.silent {
+        println!("Silent mode enabled. Using defaults or provided CLI args.");
+        let Some(ref file) = file else {
+            println!("❌ Silent mode requires a gcode file to be provided via `--input`.");
+            println!("{}😀", "Goodbye! ".green());
+            process::exit(0)
+        };
+
+        response = helpers::ZOffsetAdjustmentParams {
+            filename: file.to_string(),
+            z_offset: args.z_offset.unwrap_or(settings.z_offset),
+            first_layer_height: args
+                .first_layer_height
+                .unwrap_or(settings.first_layer_height),
+            layer_height: args.layer_height.unwrap_or(settings.layer_height),
+            revert_z_offset_at_layer: args
+                .revert_z_offset_at_layer
+                .unwrap_or(settings.revert_z_offset_at_layer),
+        };
     } else {
-        gcodes_list = helpers::get_gcode_files().expect("Failed to get gcode list");
+        let mut gcodes_list: Vec<String> = vec![];
+
+        if let Some(file) = file {
+            gcodes_list.push(file.to_string());
+        } else {
+            gcodes_list = helpers::get_gcode_files().expect("Failed to get gcode list");
+        }
+
+        if gcodes_list.len() == 0 {
+            println!(
+                "{}\n{}",
+                "❌ No gcode file provided and none were found in the current directory".red(),
+                "🗒️ Run this program with `--help` for instructions.".yellow(),
+            );
+            println!("{}😀", "Goodbye! ".green());
+            process::exit(0)
+        }
+        response = match helpers::ask_user(gcodes_list) {
+            Ok(choice) => choice,
+            Err(InquireError::OperationCanceled) => {
+                println!("{}😀", "Goodbye! ".blue());
+                process::exit(0);
+            }
+            Err(err) => {
+                eprintln!("❌ {}", err);
+                process::exit(1);
+            }
+        };
     }
 
-    if gcodes_list.len() == 0 {
-        println!(
-            "{}\n{}",
-            "❌ No gcode file provided and none were found in the current directory".red(),
-            "🗒️ Run this program with `--help` for instructions.".yellow(),
-        );
-        println!("{}😀", "Goodbye! ".green());
-        process::exit(0)
-    }
+    adjust_gcode(response)?;
+    Ok(())
+}
 
-    let response: helpers::ZOffsetAdjustmentParams = match helpers::ask_user(gcodes_list) {
-        Ok(choice) => choice,
-        Err(InquireError::OperationCanceled) => {
-            println!("{}😀", "Goodbye! ".blue());
-            process::exit(0);
-        }
-        Err(err) => {
-            eprintln!("❌ {}", err);
-            process::exit(1);
-        }
-    };
-
+fn adjust_gcode(
+    response: helpers::ZOffsetAdjustmentParams,
+) -> Result<(), Box<dyn std::error::Error>> {
     let file = fs::File::open(&response.filename).expect("Failed to open file");
     let reader = io::BufReader::new(file);
 
@@ -175,4 +227,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("{}😀", "Goodbye! ".green());
     }
     Ok(())
+}
+
+fn _positive_float(s: &str) -> Result<f32, String> {
+    let val: f32 = s.parse().map_err(|_| "must be a number".to_string())?;
+    if val < 0.0 {
+        Err(format!("{} must be a positive number", val))
+    } else {
+        Ok(val)
+    }
 }
