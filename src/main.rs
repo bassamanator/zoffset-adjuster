@@ -87,6 +87,49 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             process::exit(0)
         };
 
+        if let Some(value) = args.z_offset {
+            if value < helpers::Z_OFFSET_MIN || value > helpers::Z_OFFSET_MAX {
+                println!(
+                    "❌ Invalid z_offset value. Must be between {} and {}.",
+                    helpers::Z_OFFSET_MIN,
+                    helpers::Z_OFFSET_MAX
+                );
+                println!("{}😀", "Goodbye! ".green());
+                process::exit(0)
+            }
+        }
+        if let Some(value) = args.first_layer_height {
+            if value < helpers::LAYER_HEIGHT_MIN || value > helpers::LAYER_HEIGHT_MAX {
+                println!(
+                    "❌ Invalid first_layer_height value. Must be between {} and {}.",
+                    helpers::LAYER_HEIGHT_MIN,
+                    helpers::LAYER_HEIGHT_MAX
+                );
+                println!("{}😀", "Goodbye! ".green());
+                process::exit(0)
+            }
+        }
+        if let Some(value) = args.layer_height {
+            if value < helpers::LAYER_HEIGHT_MIN || value > helpers::LAYER_HEIGHT_MAX {
+                println!(
+                    "❌ Invalid layer_height value. Must be between {} and {}.",
+                    helpers::LAYER_HEIGHT_MIN,
+                    helpers::LAYER_HEIGHT_MAX
+                );
+                println!("{}😀", "Goodbye! ".green());
+                process::exit(0)
+            }
+        }
+        if let Some(value) = args.revert_z_offset_at_layer {
+            if value < 2 {
+                println!(
+                    "❌ Invalid revert_z_offset_at_layer value. Must be an integer greater than or equal to 2."
+                );
+                println!("{}😀", "Goodbye! ".green());
+                process::exit(0)
+            }
+        }
+
         response = helpers::ZOffsetAdjustmentParams {
             filename: file.to_string(),
             z_offset: args.z_offset.unwrap_or(settings.z_offset),

@@ -181,7 +181,6 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
 
     let z_offset = CustomType::<f32>::new("How much to adjust z_offset by?")
         .with_starting_input(&settings.z_offset.to_string())
-        // .with_starting_input("-0.015")
         .with_formatter(&|i| format!("{i:.3} mm"))
         .with_error_message("Please type a valid number")
         .with_help_message("Range: -0.400 to +0.400.\n E.g., +0.01, 0.012, -0.015, etc.\n Note: negative values lower the nozzle.")
@@ -198,7 +197,6 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
 
     let first_layer_height = CustomType::<f32>::new("What is the height of the first layer?")
         .with_starting_input(&settings.first_layer_height.to_string())
-        // .with_starting_input("0.2")
         .with_formatter(&|i| format!("{i:.3} mm"))
         .with_error_message("Please type a valid number")
         .with_help_message("E.g., 0.2, 0.26, 0.3, etc.")
@@ -219,7 +217,6 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
 
     let layer_height = CustomType::<f32>::new("What is the height of the other layers?")
         .with_starting_input(&settings.layer_height.to_string())
-        // .with_starting_input("0.2")
         .with_formatter(&|i| format!("{i:.3} mm"))
         .with_error_message("Please type a valid number")
         .with_help_message("E.g., 0.2, 0.26, 0.3, etc.")
@@ -242,7 +239,6 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
         "At the start of what layer do you want to undo the Z offset adjustment?",
     )
     .with_starting_input(&settings.revert_z_offset_at_layer.to_string())
-    // .with_starting_input("2")
     .with_formatter(&|i| format!("{i}"))
     .with_error_message("Please type a valid integer")
     .with_help_message("Enter an integer value greater than 2")
