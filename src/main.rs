@@ -8,7 +8,7 @@ use std::io::{self, BufRead, Write};
 use std::{fs, path, process};
 
 #[derive(Parser, Debug)]
-// #[command(allow_negative_numbers = true)]
+#[command(allow_negative_numbers = true)]
 #[command(name = "zoffset-adjuster")]
 #[command(about = "Adjusts the `z_offset` in gcode files for early layers.")]
 #[command(
@@ -80,8 +80,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let settings = helpers::load_settings();
 
     if args.silent {
-        println!("Silent mode enabled. Using defaults or provided CLI args.");
-        let Some(ref file) = file else {
+        let Some(file) = file else {
             println!("❌ Silent mode requires a gcode file to be provided via `--input`.");
             println!("{}😀", "Goodbye! ".green());
             process::exit(0)

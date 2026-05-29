@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::{fs, io};
 
 const SETTINGS_FILE: &str = "./settings.toml";
-pub const GCODE_DIR: &str = "./";
+const GCODE_DIR: &str = "./";
 pub const GCODE_EXT: &str = "gcode";
 pub const Z_OFFSET_MIN: f32 = -0.400;
 pub const Z_OFFSET_MAX: f32 = 0.400;
