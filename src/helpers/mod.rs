@@ -96,7 +96,7 @@ pub fn load_settings() -> Settings {
 
 #[derive(Debug)]
 pub struct ZOffsetAdjustmentParams {
-    pub filename: String,
+    pub filename: Option<String>,
     pub z_offset: f32,
     pub first_layer_height: f32,
     pub layer_height: f32,
@@ -105,7 +105,7 @@ pub struct ZOffsetAdjustmentParams {
 
 impl ZOffsetAdjustmentParams {
     pub fn new(
-        filename: String,
+        filename: Option<String>,
         z_offset: f32,
         first_layer_height: f32,
         layer_height: f32,
@@ -137,9 +137,9 @@ impl ZOffsetAdjustmentParams {
     }
 
     pub fn get_output_filename(&self) -> String {
-        let parts: Vec<&str> = self.filename.split(".gcode").collect();
-        let new = format!("{}-{}.gcode", parts[0], get_timestamp(),);
-        new
+        let filename = self.filename.as_ref().expect("filename is required");
+        let parts: Vec<&str> = filename.split(".gcode").collect();
+        format!("{}-{}.gcode", parts[0], get_timestamp())
     }
 
     pub fn revert_z_offset_at_height(&self) -> f32 {
@@ -163,10 +163,10 @@ impl ZOffsetAdjustmentParams {
     }
 }
 
-pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, InquireError> {
-    let settings = load_settings();
-    // println!("settings: {:#?}", settings);
-
+pub fn ask_user(
+    gcodes_list: Vec<String>,
+    cli_args: &ZOffsetAdjustmentParams,
+) -> Result<ZOffsetAdjustmentParams, InquireError> {
     let filename = if gcodes_list.len() == 1 {
         println!(
             "{} {} {}",
@@ -180,7 +180,7 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
     };
 
     let z_offset = CustomType::<f32>::new("How much to adjust z_offset by?")
-        .with_starting_input(&settings.z_offset.to_string())
+        .with_starting_input(&cli_args.z_offset.to_string())
         .with_formatter(&|i| format!("{i:.3} mm"))
         .with_error_message("Please type a valid number")
         .with_help_message("Range: -0.400 to +0.400.\n E.g., +0.01, 0.012, -0.015, etc.\n Note: negative values lower the nozzle.")
@@ -196,7 +196,7 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
         .prompt()?;
 
     let first_layer_height = CustomType::<f32>::new("What is the height of the first layer?")
-        .with_starting_input(&settings.first_layer_height.to_string())
+        .with_starting_input(&cli_args.first_layer_height.to_string())
         .with_formatter(&|i| format!("{i:.3} mm"))
         .with_error_message("Please type a valid number")
         .with_help_message("E.g., 0.2, 0.26, 0.3, etc.")
@@ -216,7 +216,7 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
         .prompt()?;
 
     let layer_height = CustomType::<f32>::new("What is the height of the other layers?")
-        .with_starting_input(&settings.layer_height.to_string())
+        .with_starting_input(&cli_args.layer_height.to_string())
         .with_formatter(&|i| format!("{i:.3} mm"))
         .with_error_message("Please type a valid number")
         .with_help_message("E.g., 0.2, 0.26, 0.3, etc.")
@@ -238,7 +238,7 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
     let at_what_layer_to_revert_z_offset = CustomType::<u32>::new(
         "At the start of what layer do you want to undo the Z offset adjustment?",
     )
-    .with_starting_input(&settings.revert_z_offset_at_layer.to_string())
+    .with_starting_input(&cli_args.revert_z_offset_at_layer.to_string())
     .with_formatter(&|i| format!("{i}"))
     .with_error_message("Please type a valid integer")
     .with_help_message("Enter an integer value greater than 2")
@@ -252,7 +252,7 @@ pub fn ask_user(gcodes_list: Vec<String>) -> Result<ZOffsetAdjustmentParams, Inq
     .prompt()?;
 
     Ok(ZOffsetAdjustmentParams::new(
-        filename,
+        Some(filename),
         z_offset,
         first_layer_height,
         layer_height,
