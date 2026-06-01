@@ -4,7 +4,7 @@ mod tests {
     #[test]
     fn test_revert_at_layer_height_4_layers() {
         let params = crate::helpers::ZOffsetAdjustmentParams::new(
-            "test.gcode".to_string(),
+            Some("test.gcode".to_string()),
             -0.015,
             0.26,
             0.2,
@@ -16,7 +16,7 @@ mod tests {
     #[test]
     fn test_revert_at_layer_height_6_layers() {
         let params = crate::helpers::ZOffsetAdjustmentParams::new(
-            "test.gcode".to_string(),
+            Some("test.gcode".to_string()),
             -0.015,
             0.26,
             0.2,
@@ -28,7 +28,7 @@ mod tests {
     #[test]
     fn test_revert_at_layer_height_2_layers() {
         let params = crate::helpers::ZOffsetAdjustmentParams::new(
-            "test.gcode".to_string(),
+            Some("test.gcode".to_string()),
             -0.015,
             0.26,
             0.2,
@@ -40,7 +40,7 @@ mod tests {
     #[test]
     fn test_revert_at_layer_height_1_000_000_layers() {
         let params = crate::helpers::ZOffsetAdjustmentParams::new(
-            "test.gcode".to_string(),
+            Some("test.gcode".to_string()),
             -0.015,
             0.26,
             0.2,
@@ -53,7 +53,7 @@ mod tests {
     #[test]
     fn test_adjust_z_offset_code() {
         let params = crate::helpers::ZOffsetAdjustmentParams::new(
-            "test.gcode".to_string(),
+            Some("test.gcode".to_string()),
             -0.015,
             0.26,
             0.2,
@@ -68,7 +68,7 @@ mod tests {
     #[test]
     fn test_adjust_z_offset_code2() {
         let params = crate::helpers::ZOffsetAdjustmentParams::new(
-            "test.gcode".to_string(),
+            Some("test.gcode".to_string()),
             0.029,
             0.26,
             0.2,
@@ -83,7 +83,7 @@ mod tests {
     #[test]
     fn test_revert_z_offset_code() {
         let params = crate::helpers::ZOffsetAdjustmentParams::new(
-            "test.gcode".to_string(),
+            Some("test.gcode".to_string()),
             -0.015,
             0.26,
             0.2,
@@ -104,7 +104,7 @@ mod tests {
     #[test]
     fn test_revert_z_offset_code2() {
         let params = crate::helpers::ZOffsetAdjustmentParams::new(
-            "test.gcode".to_string(),
+            Some("test.gcode".to_string()),
             0.123,
             0.26,
             0.2,
