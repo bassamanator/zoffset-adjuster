@@ -59,7 +59,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init_from_env(env);
 
     let args = Args::parse();
-    println!("args: {:#?}", args);
 
     let mut cli_args = validate_args(&args);
 
