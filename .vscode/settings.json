@@ -3,6 +3,7 @@
 		"rust": true,
 	},
 	"cSpell.words": [
+		"babystep",
 		"gcode",
 		"gcodes",
 		"Klipper",

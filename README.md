@@ -1,49 +1,76 @@
 <!-- markdownlint-disable MD041 MD028 MD040 MD033-->
 
-> [!CAUTION]
-> You can damage your 3d printer if not used correctly!
+> [!NOTE]
+> This tool was **coded by hand!**
 
 > [!WARNING]
-> I am creating these files for my personal use and cannot be held responsible for what it might do to your printer. Use at your own risk.
+> This tool is built for personal use. I cannot be held responsible for any damage to your printer. **Use at your own risk.**
 
-# zoffset-adjuster
+> [!CAUTION]
+> You can **damage your 3D printer** if not used correctly!
 
-Adjusts the `z_offset` in gcode files for early layers. E.g., if you prefer more layer squish for the first layer, and then normal layer squish for subsequent layers.
+---
+<p align="center">
+<sub>Made with ❤️ for the 3D printing community</sub>
+</p>
 
-This is especially useful for users with a warped bed, or with a bed that has poor layer squish, or adhesion, in particular spots.
+# 🖨️ zoffset-adjuster
 
-Run with `--help` for more information.
+> **Perfect your first layer. Every single print.**
 
-## How
+`zoffset-adjuster` surgically injects Z offset corrections directly into your gcode — no slicer plugins, no firmware changes, no babystep fiddling mid-print.
 
-1. Inserts `SET_GCODE_OFFSET Z_ADJUST={VALUE} MOVE=1` before starting the **first layer**.
-    - Both positive and negative values are acceptable.
-1. Inserts `SET_GCODE_OFFSET Z_ADJUST={OPPOSITE_VALUE} MOVE=1` at the requested layer.
-    - Requested layer can be anything from 2 to the last layer.
+It adjusts the `z_offset` for early layers only, then automatically reverts it — so your first layer gets the squish it deserves, and the rest of the print stays perfect.
 
-<img alt="adjustment gcode" src=".github/images/gcode-compare1.webp" width="835">
-<img alt="reversion gcode" src=".github/images/gcode-compare2.webp" width="835">
+---
 
-## Usage
+## ✨ What it does
 
-```
+1. 🔽 Inserts `SET_GCODE_OFFSET Z_ADJUST={VALUE} MOVE=1` right before your **first layer starts**
+   - Negative values → ⬇️ lower nozzle → **more squish**
+   - Positive values → ⬆️ raise nozzle → **less squish**
+
+2. 🔼 Inserts `SET_GCODE_OFFSET Z_ADJUST={OPPOSITE_VALUE} MOVE=1` at your chosen layer to **undo the adjustment**
+
+Your original `.gcode` file is **never modified** — a new file is always generated. ✅
+
+<img alt="Z offset adjustment inserted into gcode" src=".github/images/gcode-compare1.webp" width="835">
+<img alt="Z offset reversion inserted into gcode" src=".github/images/gcode-compare2.webp" width="835">
+
+---
+
+## 🚀 Usage
+
+```bash
+# Interactive mode — prompts you for everything
 ./zoffset-adjuster
 
-./zoffset-adjuster --help
+# Pass a file, get prompted for the rest
+./zoffset-adjuster ./Cube.gcode
 
-./zoffset-adjuster ./Cube.gcode 
-
+# Using the --input flag
 ./zoffset-adjuster --input ./Cube.gcode
 
-./zoffset-adjuster --silent --input ./Cube.gcode --first-layer-height 0.26 --layer-height 0.12 --revert-z-offset-at-layer 110 --z-offset -0.015
+# Fully silent — no prompts, all args required
+./zoffset-adjuster --silent --input ./Cube.gcode \
+  --first-layer-height 0.26 \
+  --layer-height 0.12 \
+  --revert-z-offset-at-layer 2 \
+  --z-offset -0.015
+
+# Show help
+./zoffset-adjuster --help
 ```
 
-### Example
+---
 
-In this example, a `cube` was sliced with `first layer height: 0.22 mm` and `layer height: 0.12 mm`. I prefer more layer squish only on the first layer, so the `z_offset` adjustment will be reverted, undone, at layer 2.
+## 🎬 Example
+
+Sliced a cube with `first layer height: 0.22mm`, `layer height: 0.12mm`. Want extra squish on the first layer only, reverting at layer 2:
 
 ```
-➜ ./zoffset-adjuster ./Cube.gcode 
+➜ ./zoffset-adjuster ./Cube.gcode
+
 > Selected file: ./Cube.gcode
 > How much to adjust z_offset by? -0.015 mm
 > What is the height of the first layer? 0.220 mm
@@ -57,9 +84,11 @@ Inserting z_offset reversion at line 384
 Goodbye! 😀
 ```
 
-### Default Settings
+---
 
-On first run, a `settings.toml` will be generated. Feel free to adjust with your standard settings.
+## ⚙️ Default Settings
+
+On first run, a `settings.toml` is generated in the current directory. Edit it to match your usual print profile so you don't have to type the same values every time:
 
 ```toml
 z_offset = -0.015
@@ -68,34 +97,55 @@ layer_height = 0.2
 revert_z_offset_at_layer = 2
 ```
 
-## Notes
+---
 
-- Klipper only.
-- Tested to work with `Orca Slicer 2.3.2`.
-- Original `.gcode` will not be changed.
-- Will not work with `adaptive layers`.
-- There are sanity checks, so wrong inputs will be caught.
-- Only tested on `linux`, for now.
+## 📋 Notes
 
-## Developer notes
+| | |
+| --- | --- |
+| 🟢 | Klipper only |
+| 🟢 | Tested with Orca Slicer 2.3.2 |
+| 🟢 | Original `.gcode` is never modified |
+| 🟢 | Sanity checks catch bad inputs |
+| 🔴 | Does **not** work with adaptive layers |
+| 🟡 | Only tested on Linux (for now) |
 
-Looks for this sequence in the `gcode`.
+---
+
+## 🛠️ Developer Notes
+
+The tool looks for this sequence in the gcode to determine layer boundaries:
 
 ```rust
-    impl GCode {
-        const LAYER_CHANGE: &'static str = ";LAYER_CHANGE";
-        const CURRENT_PRINT_HEIGHT: &'static str = ";Z:";
-        const CURRENT_LAYER_HEIGHT: &'static str = ";HEIGHT:";
-    }
-    // NOTE example sequence found in OS 2.3.2
-    // first layer height is 0.22
-    // layer height is 0.12
-    // NOTE first layer
-    // ;LAYER_CHANGE
-    // ;Z:0.22
-    // ;HEIGHT:0.22
-    // NOTE third layer
-    // ;LAYER_CHANGE
-    // ;Z:0.46
-    // ;HEIGHT:0.12
+impl GCode {
+    const LAYER_CHANGE: &'static str = ";LAYER_CHANGE";
+    const CURRENT_PRINT_HEIGHT: &'static str = ";Z:";
+    const CURRENT_LAYER_HEIGHT: &'static str = ";HEIGHT:";
+}
 ```
+
+Example sequence from Orca Slicer 2.3.2 (`first layer: 0.22mm`, `layer height: 0.12mm`):
+
+```gcode
+;LAYER_CHANGE   ← first layer
+;Z:0.22
+;HEIGHT:0.22
+
+;LAYER_CHANGE   ← third layer
+;Z:0.46
+;HEIGHT:0.12
+```
+
+---
+
+## 📦 Installation
+
+Grab the latest binary for your platform from the [Releases](../../releases/latest) page:
+
+| Platform | File |
+| --- | --- |
+| 🐧 Linux (x86_64) | `zoffset-adjuster-x86_64-unknown-linux-gnu` |
+| 🪟 Windows (x86_64) | `zoffset-adjuster-x86_64-pc-windows-msvc.exe` |
+| 🍎 macOS (Intel) | `zoffset-adjuster-x86_64-apple-darwin` |
+| 🍎 macOS (Apple Silicon) | `zoffset-adjuster-aarch64-apple-darwin` |
+| <img alt="Raspberry pi logo" src=".github/images/RPI.L.png" width="15" style="vertical-align:middle"> Raspberry Pi 4 / Orange Pi | `zoffset-adjuster-aarch64-unknown-linux-gnu` |
