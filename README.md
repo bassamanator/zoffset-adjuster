@@ -10,6 +10,7 @@
 > You can **damage your 3D printer** if not used correctly!
 
 ---
+
 <p align="center">
 <sub>Made with ❤️ for the 3D printing community</sub>
 </p>
@@ -26,11 +27,13 @@ It adjusts the `z_offset` for early layers only, then automatically reverts it �
 
 ## ✨ What it does
 
-1. 🔽 Inserts `SET_GCODE_OFFSET Z_ADJUST={VALUE} MOVE=1` right before your **first layer starts**
+1. ▶️ Inserts `SET_GCODE_OFFSET Z_ADJUST={VALUE} MOVE=1` right before your **first layer starts**
    - Negative values → ⬇️ lower nozzle → **more squish**
    - Positive values → ⬆️ raise nozzle → **less squish**
 
-2. 🔼 Inserts `SET_GCODE_OFFSET Z_ADJUST={OPPOSITE_VALUE} MOVE=1` at your chosen layer to **undo the adjustment**
+2. ▶️ Inserts `SET_GCODE_OFFSET Z_ADJUST={OPPOSITE_VALUE} MOVE=1` at your chosen layer to **undo the adjustment**
+
+3. 📻 Informs you at what line numbers the corrections were inserted so that you can verify.
 
 Your original `.gcode` file is **never modified** — a new file is always generated. ✅
 
@@ -88,7 +91,7 @@ Goodbye! 😀
 
 ## ⚙️ Default Settings
 
-On first run, a `settings.toml` is generated in the current directory. Edit it to match your usual print profile so you don't have to type the same values every time:
+A `settings.toml` is generated in the current directory if none is found. Edit it to match your usual print profile so you don't have to type the same values every time:
 
 ```toml
 z_offset = -0.015
@@ -109,6 +112,12 @@ revert_z_offset_at_layer = 2
 | 🟢 | Sanity checks catch bad inputs |
 | 🔴 | Does **not** work with adaptive layers |
 | 🟡 | Only tested on Linux (for now) |
+
+---
+
+## 📝 Todo
+
+- [ ] Add ability to run via Orca Slicer Post-Processing Script section
 
 ---
 
@@ -148,4 +157,15 @@ Grab the latest binary for your platform from the [Releases](../../releases/late
 | 🪟 Windows (x86_64) | `zoffset-adjuster-x86_64-pc-windows-msvc.exe` |
 | 🍎 macOS (Intel) | `zoffset-adjuster-x86_64-apple-darwin` |
 | 🍎 macOS (Apple Silicon) | `zoffset-adjuster-aarch64-apple-darwin` |
-| <img alt="Raspberry pi logo" src=".github/images/RPI.L.png" width="15" style="vertical-align:middle"> Raspberry Pi 4 / Orange Pi | `zoffset-adjuster-aarch64-unknown-linux-gnu` |
+| <img alt="Raspberry pi logo" src=".github/images/RPI.L.png" width="16" style="vertical-align:middle"> Raspberry Pi 4 / Orange Pi | `zoffset-adjuster-aarch64-unknown-linux-gnu` |
+
+---
+
+## 🪚 Build from Source
+
+```bash
+git clone https://github.com/bassamanator/zoffset-adjuster.git
+cd zoffset-adjuster
+cargo build --release
+# find binary under ./target/release/ 
+```
