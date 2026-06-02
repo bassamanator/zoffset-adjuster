@@ -174,4 +174,6 @@ cargo build --release
 
 Please ⭐ star this repository!
 
-Support [open source](https://en.wikipedia.org/wiki/Open_source), and buy me a [<img src=".github/images/kofi.png" height="22" style="vertical-align:middle" alt='Ko-fi'/>](https://ko-fi.com/bassamanator).
+Support [open source](https://en.wikipedia.org/wiki/Open_source).
+
+[<img src=".github/images/support_me_on_kofi_blue.png" height="50" alt='Ko-fi'/>](https://ko-fi.com/bassamanator)
