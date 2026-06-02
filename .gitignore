@@ -1,3 +1,9 @@
 /target
-ignore
 settings.toml
+
+*.gcode
+
+# Unignore test fixtures
+!src/tests/fixtures/Cube_FL0.20mm_LH0.20mm.gcode
+!src/tests/fixtures/Cube_FL0.26mm_LH0.12mm.gcode
+!src/tests/fixtures/Cube_FL0.26mm_LH0.20mm.gcode
