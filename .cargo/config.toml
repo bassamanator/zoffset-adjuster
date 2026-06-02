@@ -2,3 +2,4 @@
 test1 = "run -- --silent --input src/tests/fixtures/Cube_FL0.26mm_LH0.12mm.gcode --first-layer-height 0.26 --layer-height 0.12 --revert-z-offset-at-layer 110 --z-offset -0.015"
 test2 = "run -- --silent --input src/tests/fixtures/Cube_FL0.20mm_LH0.20mm.gcode --first-layer-height 0.20 --layer-height 0.20 --revert-z-offset-at-layer 4 --z-offset +0.012"
 test3 = "run -- --silent --input src/tests/fixtures/Cube_FL0.26mm_LH0.20mm.gcode --first-layer-height 0.26 --layer-height 0.20 --revert-z-offset-at-layer 2 --z-offset -0.200"
+testfail = "run -- --silent --input src/tests/fixtures/Cube_FL0.26mm_LH0.20mm.gcode --first-layer-height 0.07 --layer-height 0.13 --revert-z-offset-at-layer 2 --z-offset -0.200"

@@ -21,8 +21,8 @@ Run with `--help` for more information.
 1. Inserts `SET_GCODE_OFFSET Z_ADJUST={OPPOSITE_VALUE} MOVE=1` at the requested layer.
     - Requested layer can be anything from 2 to the last layer.
 
-<img alt="adjust" src=".github/images/gcode-compare1.webp" width="700">
-<img alt="adjust" src=".github/images/gcode-compare2.webp" width="700">
+<img alt="adjustment gcode" src=".github/images/gcode-compare1.webp" width="835">
+<img alt="reversion gcode" src=".github/images/gcode-compare2.webp" width="835">
 
 ## Usage
 
@@ -34,6 +34,8 @@ Run with `--help` for more information.
 ./zoffset-adjuster ./Cube.gcode 
 
 ./zoffset-adjuster --input ./Cube.gcode
+
+./zoffset-adjuster --silent --input ./Cube.gcode --first-layer-height 0.26 --layer-height 0.12 --revert-z-offset-at-layer 110 --z-offset -0.015
 ```
 
 ### Example
@@ -55,6 +57,17 @@ Inserting z_offset reversion at line 384
 Goodbye! 😀
 ```
 
+### Default Settings
+
+On first run, a `settings.toml` will be generated. Feel free to adjust with your standard settings.
+
+```toml
+z_offset = -0.015
+first_layer_height = 0.26
+layer_height = 0.2
+revert_z_offset_at_layer = 2
+```
+
 ## Notes
 
 - Klipper only.
@@ -64,7 +77,7 @@ Goodbye! 😀
 - There are sanity checks, so wrong inputs will be caught.
 - Only tested on `linux`, for now.
 
-## Dev notes
+## Developer notes
 
 Looks for this sequence in the `gcode`.
 
