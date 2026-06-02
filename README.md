@@ -169,3 +169,9 @@ cd zoffset-adjuster
 cargo build --release
 # find binary under ./target/release/ 
 ```
+
+## ❤️ Support Me
+
+Please ⭐ star this repository!
+
+Support [open source](https://en.wikipedia.org/wiki/Open_source), and buy me a [<img src=".github/images/kofi.png" height="22" style="vertical-align:middle" alt='Ko-fi'/>](https://ko-fi.com/bassamanator).
