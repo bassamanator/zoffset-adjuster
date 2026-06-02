@@ -27,13 +27,13 @@ It adjusts the `z_offset` for early layers only, then automatically reverts it �
 
 ## ✨ What it does
 
-1. ▶️ Inserts `SET_GCODE_OFFSET Z_ADJUST={VALUE} MOVE=1` right before your **first layer starts**
+1. Inserts `SET_GCODE_OFFSET Z_ADJUST={VALUE} MOVE=1` right before your **first layer starts**
    - Negative values → ⬇️ lower nozzle → **more squish**
    - Positive values → ⬆️ raise nozzle → **less squish**
 
-2. ▶️ Inserts `SET_GCODE_OFFSET Z_ADJUST={OPPOSITE_VALUE} MOVE=1` at your chosen layer to **undo the adjustment**
+2. Inserts `SET_GCODE_OFFSET Z_ADJUST={OPPOSITE_VALUE} MOVE=1` at your chosen layer to **undo the adjustment**
 
-3. 📻 Informs you at what line numbers the corrections were inserted so that you can verify.
+3. Informs you at what line numbers the corrections were inserted into, so that you can verify the changes (via `git diff`, `Meld`, manually, etc.).
 
 Your original `.gcode` file is **never modified** — a new file is always generated. ✅
 
