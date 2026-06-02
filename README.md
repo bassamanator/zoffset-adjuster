@@ -21,8 +21,8 @@ Run with `--help` for more information.
 1. Inserts `SET_GCODE_OFFSET Z_ADJUST={OPPOSITE_VALUE} MOVE=1` at the requested layer.
     - Requested layer can be anything from 2 to the last layer.
 
-<img alt="adjust" src="./readme/gcode-compare1.webp" width="700">
-<img alt="adjust" src="./readme/gcode-compare2.webp" width="700">
+<img alt="adjust" src=".github/images/gcode-compare1.webp" width="700">
+<img alt="adjust" src=".github/images/gcode-compare2.webp" width="700">
 
 ## Usage
 

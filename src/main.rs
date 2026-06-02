@@ -156,17 +156,17 @@ fn adjust_gcode(
             was_as_layer_change = false;
             was_as_current_z = false;
 
-            if !first_gcode_insertion && capture_current_print_height == response.first_layer_height
-            {
-                first_gcode_insertion = true;
-                let _ = writeln!(writer, "{}", response.adjust_z_offset_code());
-                println!(
-                    "\n{} {}",
-                    "Inserting z_offset adjustment at line".italic().b_magenta(),
-                    inserting_cmd_at_line
-                );
+            if !first_gcode_insertion {
+                if capture_current_print_height == response.first_layer_height {
+                    first_gcode_insertion = true;
+                    let _ = writeln!(writer, "{}", response.adjust_z_offset_code());
+                    println!(
+                        "\n{} {}",
+                        "Inserting z_offset adjustment at line".italic().b_magenta(),
+                        inserting_cmd_at_line
+                    );
+                }
             } else {
-                // NOTE is the current print height where the reversion should be inserted at?
                 if capture_current_print_height == response.revert_z_offset_at_height()
                     && layer_counter == response.revert_z_offset_at_layer
                 {
@@ -201,8 +201,7 @@ fn adjust_gcode(
 }
 
 fn validate_args(args: &Args) -> helpers::ZOffsetAdjustmentParams {
-    let binding = args.file.to_owned();
-    let file = &args.input.as_ref().or(binding.as_ref());
+    let file = &args.input.clone().or(args.file.clone());
     let file: Option<String> = match file {
         Some(f) => {
             let p = path::Path::new(&f);
