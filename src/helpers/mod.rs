@@ -303,7 +303,7 @@ pub fn add_log_entry<T: std::fmt::Debug>(key: &str, value: T) {
 
     writeln!(
         log,
-        "{}, {}, {:?}",
+        "{}, {}, {:#?}",
         chrono::Local::now().format("%H%M%S%.3f").to_string(),
         key,
         value

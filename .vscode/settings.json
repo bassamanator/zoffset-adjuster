@@ -8,6 +8,7 @@
 		"gcodes",
 		"Klipper",
 		"Prusa",
+		"SLIC",
 		"zoffset"
 	],
 }
