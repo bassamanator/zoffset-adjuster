@@ -4,7 +4,7 @@ use log::warn;
 use serde::{Deserialize, Serialize};
 use std::{fs, io};
 
-const SETTINGS_FILE: &str = "./settings.toml";
+const SETTINGS_FILENAME: &str = "settings.toml";
 const GCODE_DIR: &str = "./";
 pub const GCODE_EXT: &str = "gcode";
 pub const Z_OFFSET_MIN: f32 = -0.400;
@@ -52,29 +52,41 @@ impl Default for Settings {
     }
 }
 
+fn settings_path() -> std::path::PathBuf {
+    std::env::current_exe()
+        .expect("Failed to get binary path")
+        .parent()
+        .expect("Failed to get binary directory")
+        .join(SETTINGS_FILENAME)
+}
+
 pub fn load_settings() -> Settings {
-    let content = match fs::read_to_string(SETTINGS_FILE) {
+    let settings_file = settings_path();
+    let content = match fs::read_to_string(&settings_file) {
         Ok(s) if !s.is_empty() => s,
         Ok(_) => {
             warn!(
                 "{} exists but is empty — using default Settings.",
-                SETTINGS_FILE
+                settings_file.display()
             );
             return Settings::default();
         }
         Err(e) => match e.kind() {
             io::ErrorKind::NotFound => {
-                println!("Creating {} with default settings.", SETTINGS_FILE);
-
+                println!(
+                    "Creating {} with default settings.",
+                    settings_file.display()
+                );
                 if let Ok(serialized) = toml::to_string_pretty(&Settings::default()) {
-                    let _ = fs::write(SETTINGS_FILE, serialized);
+                    let _ = fs::write(&settings_file, serialized);
                 }
                 return Settings::default();
             }
             _ => {
                 warn!(
                     "Failed to read {}: {} — using default Settings.",
-                    SETTINGS_FILE, e
+                    settings_file.display(),
+                    e
                 );
                 return Settings::default();
             }
@@ -86,7 +98,7 @@ pub fn load_settings() -> Settings {
         Err(e) => {
             eprintln!(
                 "Failed to parse {} as TOML, you should delete it. Using default settings.",
-                SETTINGS_FILE
+                settings_file.display()
             );
             warn!("{}", e);
             Settings::default()
