@@ -1,10 +1,11 @@
 mod helpers;
 mod tests;
+use crate::helpers::add_log_entry;
 use clap::Parser;
 use colorize::AnsiColor;
 use env_logger::Env;
 use inquire::InquireError;
-use std::io::{self, BufRead, Write};
+use std::io::{self, Write as IoWrite};
 use std::{fs, path, process};
 
 #[derive(Parser, Debug)]
@@ -49,9 +50,14 @@ struct Args {
     /// Revert z_offset at layer
     #[arg(short, long)]
     revert_z_offset_at_layer: Option<u32>,
+
+    /// Use only with slicer (Orca Slicer, Prusa Slicer, etc.)
+    #[arg(long)]
+    slicer: bool,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    add_log_entry("args", std::env::args().collect::<Vec<_>>());
     let env = Env::default()
         .filter_or("RUST_LOG", "off")
         .write_style_or("MY_LOG_STYLE", "always");
@@ -100,19 +106,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     adjust_gcode(cli_args)?;
-    Ok(())
+
+    add_log_entry("status", &"About to exit normally");
+    std::process::exit(0);
+    // Ok(())
 }
 
 fn adjust_gcode(
     response: helpers::ZOffsetAdjustmentParams,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let file = fs::File::open(&response.filename.as_ref().expect("Filename is required"))
-        .expect("Failed to open file");
-    let reader = io::BufReader::new(file);
+    let content = fs::read_to_string(&response.filename.as_ref().expect("Filename is required"))?;
+    let lines: Vec<&str> = content.lines().collect();
 
     let out_path = response.get_output_filename();
     let out_file = fs::File::create(&out_path)?;
     let mut writer = io::BufWriter::new(out_file);
+
+    add_log_entry("filename", &response.filename);
+    add_log_entry("out_path", &out_path);
 
     struct GCode;
     impl GCode {
@@ -130,10 +141,9 @@ fn adjust_gcode(
     let mut capture_current_print_height: f32 = 0.0;
     let mut layer_counter: u32 = 0;
 
-    for (current_line_position, line) in reader.lines().enumerate() {
+    for (current_line_position, line) in lines.iter().enumerate() {
         let inserting_cmd_at_line = current_line_position + 1 + 1;
         let inserting_2nd_cmd_at_line = current_line_position + 1 + 1 + 1;
-        let line = line?;
 
         let _ = writeln!(writer, "{}", line);
 
@@ -182,8 +192,13 @@ fn adjust_gcode(
         }
     }
 
+    writer.flush()?;
+    drop(writer);
+
+    add_log_entry("first_gcode_insertion", first_gcode_insertion);
+    add_log_entry("second_gcode_insertion", second_gcode_insertion);
+
     if !second_gcode_insertion || !first_gcode_insertion {
-        drop(writer);
         let new_path = out_path.replace(".gcode", "-DO-NOT-USE.gcode");
         fs::rename(&out_path, &new_path)?;
         println!(
@@ -194,9 +209,14 @@ fn adjust_gcode(
             "🤔 The inputs were likely incorrect, double check them and try again.".yellow()
         );
     } else {
+        let written = fs::read_to_string(&out_path).unwrap_or_default();
+        let has_adjustment = written.contains("SET_GCODE_OFFSET");
+        add_log_entry("new gcode is correct?", has_adjustment);
+
         println!("\n{} {}", out_path.b_blue(), "generated!".cyan());
         println!("{}😀", "Goodbye! ".green());
     }
+
     Ok(())
 }
 
@@ -205,9 +225,14 @@ fn validate_args(args: &Args) -> helpers::ZOffsetAdjustmentParams {
     let file: Option<String> = match file {
         Some(f) => {
             let p = path::Path::new(&f);
-            if !(p.is_file()
-                && p.extension().and_then(|ext| ext.to_str()) == Some(helpers::GCODE_EXT))
-            {
+            let valid = if args.slicer {
+                p.is_file()
+            } else {
+                p.is_file()
+                    && p.extension().and_then(|ext| ext.to_str()) == Some(helpers::GCODE_EXT)
+            };
+
+            if !valid {
                 println!("❌ Invalid input. Only `.gcode` files are permissible.");
                 process::exit(0)
             }
@@ -270,6 +295,7 @@ fn validate_args(args: &Args) -> helpers::ZOffsetAdjustmentParams {
         revert_z_offset_at_layer: args
             .revert_z_offset_at_layer
             .unwrap_or(settings.revert_z_offset_at_layer),
+        slicer: args.slicer,
     };
     response
 }

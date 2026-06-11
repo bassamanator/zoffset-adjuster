@@ -113,6 +113,7 @@ pub struct ZOffsetAdjustmentParams {
     pub first_layer_height: f32,
     pub layer_height: f32,
     pub revert_z_offset_at_layer: u32,
+    pub slicer: bool,
 }
 
 impl ZOffsetAdjustmentParams {
@@ -122,6 +123,7 @@ impl ZOffsetAdjustmentParams {
         first_layer_height: f32,
         layer_height: f32,
         revert_z_offset_at_layer: u32,
+        slicer: bool,
     ) -> Self {
         Self {
             filename,
@@ -129,6 +131,7 @@ impl ZOffsetAdjustmentParams {
             first_layer_height,
             layer_height,
             revert_z_offset_at_layer,
+            slicer,
         }
     }
 
@@ -149,6 +152,14 @@ impl ZOffsetAdjustmentParams {
     }
 
     pub fn get_output_filename(&self) -> String {
+        if self.slicer {
+            return self
+                .filename
+                .as_ref()
+                .expect("filename is required")
+                .clone();
+        }
+
         let filename = self.filename.as_ref().expect("filename is required");
         let parts: Vec<&str> = filename.split(".gcode").collect();
         format!("{}-{}.gcode", parts[0], get_timestamp())
@@ -269,12 +280,33 @@ pub fn ask_user(
         first_layer_height,
         layer_height,
         at_what_layer_to_revert_z_offset,
+        false,
     ))
 }
 
 fn get_timestamp() -> String {
     chrono::Local::now()
-        .format("%I%M%S")
+        .format("%H%M%S")
         .to_string()
         .to_uppercase()
+}
+
+pub fn add_log_entry<T: std::fmt::Debug>(key: &str, value: T) {
+    use std::io::Write;
+
+    let log_path = std::env::temp_dir().join("zoffset-debug.log");
+    let mut log = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&log_path)
+        .unwrap();
+
+    writeln!(
+        log,
+        "{}, {}, {:?}",
+        chrono::Local::now().format("%H%M%S%.3f").to_string(),
+        key,
+        value
+    )
+    .unwrap();
 }
