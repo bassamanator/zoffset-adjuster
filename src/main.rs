@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             slicer_vars.insert(key, value);
         }
     }
-    add_log_entry("env vars", slicer_vars);
+    // add_log_entry("env vars", slicer_vars);
 
     let env = Env::default()
         .filter_or("RUST_LOG", "off")
