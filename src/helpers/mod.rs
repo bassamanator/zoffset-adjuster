@@ -181,7 +181,7 @@ impl ZOffsetAdjustmentParams {
     pub fn revert_z_offset_code(&self) -> String {
         format!(
             "SET_GCODE_OFFSET Z_ADJUST={} MOVE=1",
-            self.get_signed(self.z_offset * (-1 as f32))
+            self.get_signed(-self.z_offset)
         )
     }
 }
@@ -304,7 +304,7 @@ pub fn add_log_entry<T: std::fmt::Debug>(key: &str, value: T) {
     writeln!(
         log,
         "{}, {}, {:#?}",
-        chrono::Local::now().format("%H%M%S%.3f").to_string(),
+        chrono::Local::now().format("%H%M%S%.3f"),
         key,
         value
     )

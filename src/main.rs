@@ -95,7 +95,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             gcodes_list = helpers::get_gcode_files().expect("Failed to get gcode list");
         }
 
-        if gcodes_list.len() == 0 {
+        if gcodes_list.is_empty() {
             println!(
                 "{}\n{}",
                 "❌ No gcode file provided and none were found in the current directory".red(),
@@ -119,7 +119,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     adjust_gcode(cli_args)?;
 
-    add_log_entry("status", &"About to exit normally");
+    add_log_entry("status", "About to exit normally");
     std::process::exit(0);
     // Ok(())
 }
@@ -127,7 +127,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn adjust_gcode(
     response: helpers::ZOffsetAdjustmentParams,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let content = fs::read_to_string(&response.filename.as_ref().expect("Filename is required"))?;
+    let content = fs::read_to_string(response.filename.as_ref().expect("Filename is required"))?;
     let lines: Vec<&str> = content.lines().collect();
 
     let out_path = response.get_output_filename();
@@ -252,52 +252,51 @@ fn validate_args(args: &Args) -> helpers::ZOffsetAdjustmentParams {
         }
         None => None,
     };
-    if let Some(value) = args.z_offset {
-        if value < helpers::Z_OFFSET_MIN || value > helpers::Z_OFFSET_MAX {
-            println!(
-                "❌ Invalid z_offset value. Must be between {} and {}.",
-                helpers::Z_OFFSET_MIN,
-                helpers::Z_OFFSET_MAX
-            );
-            println!("{}😀", "Goodbye! ".green());
-            process::exit(0)
-        }
+    if let Some(value) = args.z_offset
+        && !(helpers::Z_OFFSET_MIN..=helpers::Z_OFFSET_MAX).contains(&value)
+    {
+        println!(
+            "❌ Invalid z_offset value. Must be between {} and {}.",
+            helpers::Z_OFFSET_MIN,
+            helpers::Z_OFFSET_MAX
+        );
+        println!("{}😀", "Goodbye! ".green());
+        process::exit(0)
     }
-    if let Some(value) = args.first_layer_height {
-        if value < helpers::LAYER_HEIGHT_MIN || value > helpers::LAYER_HEIGHT_MAX {
-            println!(
-                "❌ Invalid first_layer_height value. Must be between {} and {}.",
-                helpers::LAYER_HEIGHT_MIN,
-                helpers::LAYER_HEIGHT_MAX
-            );
-            println!("{}😀", "Goodbye! ".green());
-            process::exit(0)
-        }
+    if let Some(value) = args.first_layer_height
+        && !(helpers::LAYER_HEIGHT_MIN..=helpers::LAYER_HEIGHT_MAX).contains(&value)
+    {
+        println!(
+            "❌ Invalid first_layer_height value. Must be between {} and {}.",
+            helpers::LAYER_HEIGHT_MIN,
+            helpers::LAYER_HEIGHT_MAX
+        );
+        println!("{}😀", "Goodbye! ".green());
+        process::exit(0)
     }
-    if let Some(value) = args.layer_height {
-        if value < helpers::LAYER_HEIGHT_MIN || value > helpers::LAYER_HEIGHT_MAX {
-            println!(
-                "❌ Invalid layer_height value. Must be between {} and {}.",
-                helpers::LAYER_HEIGHT_MIN,
-                helpers::LAYER_HEIGHT_MAX
-            );
-            println!("{}😀", "Goodbye! ".green());
-            process::exit(0)
-        }
+    if let Some(value) = args.layer_height
+        && !(helpers::LAYER_HEIGHT_MIN..=helpers::LAYER_HEIGHT_MAX).contains(&value)
+    {
+        println!(
+            "❌ Invalid layer_height value. Must be between {} and {}.",
+            helpers::LAYER_HEIGHT_MIN,
+            helpers::LAYER_HEIGHT_MAX
+        );
+        println!("{}😀", "Goodbye! ".green());
+        process::exit(0)
     }
-    if let Some(value) = args.revert_z_offset_at_layer {
-        if value < 2 {
-            println!(
-                "❌ Invalid revert_z_offset_at_layer value. Must be an integer greater than or equal to 2."
-            );
-            println!("{}😀", "Goodbye! ".green());
-            process::exit(0)
-        }
+    if let Some(value) = args.revert_z_offset_at_layer
+        && value < 2
+    {
+        println!(
+            "❌ Invalid revert_z_offset_at_layer value. Must be an integer greater than or equal to 2."
+        );
+        println!("{}😀", "Goodbye! ".green());
+        process::exit(0)
     }
-
     let settings = helpers::load_settings();
 
-    let response = helpers::ZOffsetAdjustmentParams {
+    helpers::ZOffsetAdjustmentParams {
         filename: file,
         z_offset: args.z_offset.unwrap_or(settings.z_offset),
         first_layer_height: args
@@ -308,6 +307,5 @@ fn validate_args(args: &Args) -> helpers::ZOffsetAdjustmentParams {
             .revert_z_offset_at_layer
             .unwrap_or(settings.revert_z_offset_at_layer),
         slicer: args.slicer,
-    };
-    response
+    }
 }
