@@ -9,6 +9,7 @@ mod tests {
             0.26,
             0.2,
             4,
+            false,
         );
         assert_eq!(params.revert_z_offset_at_height(), 0.86);
     }
@@ -21,6 +22,7 @@ mod tests {
             0.26,
             0.2,
             6,
+            false,
         );
         assert_eq!(params.revert_z_offset_at_height(), 1.26);
     }
@@ -33,6 +35,7 @@ mod tests {
             0.26,
             0.2,
             2,
+            false,
         );
         assert_eq!(params.revert_z_offset_at_height(), 0.46);
     }
@@ -45,6 +48,7 @@ mod tests {
             0.26,
             0.2,
             1_000_000,
+            false,
         );
         let ans = ((1_000_000 - 1) as f32) * params.layer_height + params.first_layer_height;
         assert_eq!(params.revert_z_offset_at_height(), ans);
@@ -58,6 +62,7 @@ mod tests {
             0.26,
             0.2,
             2,
+            false,
         );
         assert_eq!(
             params.adjust_z_offset_code(),
@@ -73,6 +78,7 @@ mod tests {
             0.26,
             0.2,
             2,
+            false,
         );
         assert_eq!(
             params.adjust_z_offset_code(),
@@ -88,6 +94,7 @@ mod tests {
             0.26,
             0.2,
             2,
+            false,
         );
 
         println!("params: {:#?}", params);
@@ -109,6 +116,7 @@ mod tests {
             0.26,
             0.2,
             2,
+            false,
         );
 
         println!("params: {:#?}", params);
