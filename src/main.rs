@@ -5,7 +5,6 @@ use clap::Parser;
 use colorize::AnsiColor;
 use env_logger::Env;
 use inquire::InquireError;
-use std::collections::HashMap;
 use std::io::{self, Write as IoWrite};
 use std::{fs, path, process};
 
@@ -40,7 +39,6 @@ struct Args {
     z_offset: Option<f32>,
 
     /// First layer height
-    // #[arg(short, long, value_parser = positive_float )]
     #[arg(short, long)]
     first_layer_height: Option<f32>,
 
@@ -57,25 +55,21 @@ struct Args {
     slicer: bool,
 }
 
-fn extract_slicer_vars(vars: &HashMap<String, String>) {
-    let first_layer_height = vars.get("SLIC3R_INITIAL_LAYER_PRINT_HEIGHT");
-    let layer_height = vars.get("SLIC3R_LAYER_HEIGHT");
-    println!("first_layer_height: {:?}", first_layer_height);
-    println!("layer_height: {:?}", layer_height);
-    add_log_entry("first_layer_height", first_layer_height);
-    add_log_entry("layer_height", layer_height);
+#[derive(Debug)]
+pub struct SlicerLayerHeights {
+    pub first_layer_height: Option<String>,
+    pub layer_height: Option<String>,
+}
+
+fn extract_layer_heights_from_slicer_env() -> SlicerLayerHeights {
+    SlicerLayerHeights {
+        first_layer_height: std::env::var("SLIC3R_INITIAL_LAYER_PRINT_HEIGHT").ok(),
+        layer_height: std::env::var("SLIC3R_LAYER_HEIGHT").ok(),
+    }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     add_log_entry("args", std::env::args().collect::<Vec<_>>());
-
-    let mut slicer_vars: HashMap<String, String> = HashMap::new();
-    for (key, value) in std::env::vars() {
-        if key.starts_with("SLIC3R_") {
-            slicer_vars.insert(key, value);
-        }
-    }
-    extract_slicer_vars(&slicer_vars);
 
     let env = Env::default()
         .filter_or("RUST_LOG", "off")
@@ -254,6 +248,7 @@ fn validate_args(args: &Args) -> helpers::ZOffsetAdjustmentParams {
         }
         None => None,
     };
+
     if let Some(value) = args.z_offset
         && !(helpers::Z_OFFSET_MIN..=helpers::Z_OFFSET_MAX).contains(&value)
     {
@@ -265,6 +260,7 @@ fn validate_args(args: &Args) -> helpers::ZOffsetAdjustmentParams {
         println!("{}😀", "Goodbye! ".green());
         process::exit(0)
     }
+
     if let Some(value) = args.first_layer_height
         && !(helpers::LAYER_HEIGHT_MIN..=helpers::LAYER_HEIGHT_MAX).contains(&value)
     {
@@ -276,6 +272,7 @@ fn validate_args(args: &Args) -> helpers::ZOffsetAdjustmentParams {
         println!("{}😀", "Goodbye! ".green());
         process::exit(0)
     }
+
     if let Some(value) = args.layer_height
         && !(helpers::LAYER_HEIGHT_MIN..=helpers::LAYER_HEIGHT_MAX).contains(&value)
     {
@@ -287,6 +284,7 @@ fn validate_args(args: &Args) -> helpers::ZOffsetAdjustmentParams {
         println!("{}😀", "Goodbye! ".green());
         process::exit(0)
     }
+
     if let Some(value) = args.revert_z_offset_at_layer
         && value < 2
     {
@@ -296,15 +294,25 @@ fn validate_args(args: &Args) -> helpers::ZOffsetAdjustmentParams {
         println!("{}😀", "Goodbye! ".green());
         process::exit(0)
     }
+
     let settings = helpers::load_settings();
+    let heights = extract_layer_heights_from_slicer_env();
+    add_log_entry("Slic3r env heights", &heights);
 
     helpers::ZOffsetAdjustmentParams {
         filename: file,
         z_offset: args.z_offset.unwrap_or(settings.z_offset),
         first_layer_height: args
             .first_layer_height
+            .or(heights
+                .first_layer_height
+                .as_deref()
+                .and_then(|v| v.parse().ok()))
             .unwrap_or(settings.first_layer_height),
-        layer_height: args.layer_height.unwrap_or(settings.layer_height),
+        layer_height: args
+            .layer_height
+            .or(heights.layer_height.as_deref().and_then(|v| v.parse().ok()))
+            .unwrap_or(settings.layer_height),
         revert_z_offset_at_layer: args
             .revert_z_offset_at_layer
             .unwrap_or(settings.revert_z_offset_at_layer),
