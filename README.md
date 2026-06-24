@@ -132,7 +132,7 @@ Grab the latest binary for your platform from the [Releases](../../releases/late
 
 ## ⚙️ Default Settings
 
-A `settings.toml` is generated in the current directory if none is found. Edit it to match your usual print profile so you don't have to type the same values every time:
+A `zoffa-settings.toml` is generated in the current directory if none is found. Edit it to match your usual print profile so you don't have to type the same values every time:
 
 ```toml
 z_offset = -0.015

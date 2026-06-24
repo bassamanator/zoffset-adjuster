@@ -4,7 +4,7 @@ use log::warn;
 use serde::{Deserialize, Serialize};
 use std::{fs, io};
 
-const SETTINGS_FILENAME: &str = "settings.toml";
+const SETTINGS_FILENAME: &str = "zoffa-settings.toml";
 const GCODE_DIR: &str = "./";
 pub const GCODE_EXT: &str = "gcode";
 pub const Z_OFFSET_MIN: f32 = -0.400;

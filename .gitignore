@@ -1,5 +1,8 @@
 /target
-settings.toml
+zoffa-settings.toml
+
+# Unignore example settings file
+!src/tests/fixtures/zoffa-settings.toml
 
 *.gcode
 
