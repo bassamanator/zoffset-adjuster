@@ -16,27 +16,27 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             binary: zoffset-adjuster
-            artifact: zoffset-adjuster-x86_64-unknown-linux-gnu
+            artifact: zoffa-x86_64-unknown-linux-gnu
             use_cross: false
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             binary: zoffset-adjuster.exe
-            artifact: zoffset-adjuster-x86_64-pc-windows-msvc.exe
+            artifact: zoffa-x86_64-pc-windows-msvc.exe
             use_cross: false
           - os: macos-latest
             target: x86_64-apple-darwin
             binary: zoffset-adjuster
-            artifact: zoffset-adjuster-x86_64-apple-darwin
+            artifact: zoffa-x86_64-apple-darwin
             use_cross: false
           - os: macos-latest
             target: aarch64-apple-darwin
             binary: zoffset-adjuster
-            artifact: zoffset-adjuster-aarch64-apple-darwin
+            artifact: zoffa-aarch64-apple-darwin
             use_cross: false
           - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             binary: zoffset-adjuster
-            artifact: zoffset-adjuster-aarch64-unknown-linux-gnu
+            artifact: zoffa-aarch64-unknown-linux-gnu
             use_cross: true
 
     runs-on: ${{ matrix.os }}
