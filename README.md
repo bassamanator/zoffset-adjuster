@@ -25,7 +25,7 @@ It adjusts the `z_offset` for early layers only, then automatically reverts it �
 
 ---
 
-## ✨ What it does
+## ✨ What and How
 
 1. Inserts `SET_GCODE_OFFSET Z_ADJUST={VALUE} MOVE=1` right before your **first layer starts**
    - Negative values → ⬇️ lower nozzle → **more squish**
@@ -44,26 +44,50 @@ Your original `.gcode` file is **never modified** — a new file is always gener
 
 ## 🚀 Usage
 
+### CLI
+
 ```bash
 # Interactive mode — prompts you for everything
-./zoffset-adjuster
+zoffa
 
 # Pass a file, get prompted for the rest
-./zoffset-adjuster ./Cube.gcode
+zoffa ./Cube.gcode
 
 # Using the --input flag
-./zoffset-adjuster --input ./Cube.gcode
+zoffa --input ./Cube.gcode
 
 # Fully silent — no prompts, all args required
-./zoffset-adjuster --silent --input ./Cube.gcode \
+zoffa --silent --input ./Cube.gcode \
   --first-layer-height 0.26 \
   --layer-height 0.12 \
   --revert-z-offset-at-layer 2 \
   --z-offset -0.015
 
 # Show help
-./zoffset-adjuster --help
+zoffa --help
 ```
+
+### Slicer
+
+Order of precedence in descending: `provided args` > `slicer environment settings` > `default settings`.
+
+#### Minimal (recommended)
+
+- Relevant layer heights are pulled automatically.
+
+```bash
+/usr/bin/zoffa --slicer --silent --z-offset -0.015 --revert-z-offset-at-layer 2 --input;
+```
+
+<img alt="minimal slicer post processing entry" src=".github/images/slicer-minimal.png" width="600">
+
+#### Explicit
+
+```bash
+/usr/bin/zoffa --slicer --silent --z-offset -0.015 --revert-z-offset-at-layer 2 --first-layer-height 0.26 --layer-height 0.20 --input;
+```
+
+<img alt="full slicer post processing entry" src=".github/images/slicer-full.png" width="600">
 
 ---
 
@@ -86,6 +110,20 @@ Inserting z_offset reversion at line 384
 ./Cube-054539.gcode generated!
 Goodbye! 😀
 ```
+
+---
+
+## 📦 Installation
+
+Grab the latest binary for your platform from the [Releases](../../releases/latest) page:
+
+| Platform | File |
+| --- | --- |
+| 🐧 Linux (x86_64) | `zoffset-adjuster-x86_64-unknown-linux-gnu` |
+| 🪟 Windows (x86_64) | `zoffset-adjuster-x86_64-pc-windows-msvc.exe` |
+| 🍎 macOS (Intel) | `zoffset-adjuster-x86_64-apple-darwin` |
+| 🍎 macOS (Apple Silicon) | `zoffset-adjuster-aarch64-apple-darwin` |
+| <img alt="Raspberry pi logo" src=".github/images/RPI.L.png" width="16" style="vertical-align:middle"> Raspberry Pi 4 / Orange Pi | `zoffset-adjuster-aarch64-unknown-linux-gnu` |
 
 ---
 
@@ -144,20 +182,6 @@ Example sequence from Orca Slicer 2.3.2 (`first layer: 0.22mm`, `layer height: 0
 ;Z:0.46
 ;HEIGHT:0.12
 ```
-
----
-
-## 📦 Installation
-
-Grab the latest binary for your platform from the [Releases](../../releases/latest) page:
-
-| Platform | File |
-| --- | --- |
-| 🐧 Linux (x86_64) | `zoffset-adjuster-x86_64-unknown-linux-gnu` |
-| 🪟 Windows (x86_64) | `zoffset-adjuster-x86_64-pc-windows-msvc.exe` |
-| 🍎 macOS (Intel) | `zoffset-adjuster-x86_64-apple-darwin` |
-| 🍎 macOS (Apple Silicon) | `zoffset-adjuster-aarch64-apple-darwin` |
-| <img alt="Raspberry pi logo" src=".github/images/RPI.L.png" width="16" style="vertical-align:middle"> Raspberry Pi 4 / Orange Pi | `zoffset-adjuster-aarch64-unknown-linux-gnu` |
 
 ---
 
