@@ -57,18 +57,25 @@ struct Args {
     slicer: bool,
 }
 
+fn extract_slicer_vars(vars: &HashMap<String, String>) {
+    let first_layer_height = vars.get("SLIC3R_INITIAL_LAYER_PRINT_HEIGHT");
+    let layer_height = vars.get("SLIC3R_LAYER_HEIGHT");
+    println!("first_layer_height: {:?}", first_layer_height);
+    println!("layer_height: {:?}", layer_height);
+    add_log_entry("first_layer_height", first_layer_height);
+    add_log_entry("layer_height", layer_height);
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     add_log_entry("args", std::env::args().collect::<Vec<_>>());
 
-    // SLIC3R_INITIAL_LAYER_PRINT_HEIGHT
-    // SLIC3R_LAYER_HEIGHT
     let mut slicer_vars: HashMap<String, String> = HashMap::new();
     for (key, value) in std::env::vars() {
         if key.starts_with("SLIC3R_") {
             slicer_vars.insert(key, value);
         }
     }
-    // add_log_entry("env vars", slicer_vars);
+    extract_slicer_vars(&slicer_vars);
 
     let env = Env::default()
         .filter_or("RUST_LOG", "off")
