@@ -119,9 +119,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     adjust_gcode(cli_args)?;
 
-    add_log_entry("status", "About to exit normally");
-    std::process::exit(0);
-    // Ok(())
+    Ok(())
 }
 
 fn adjust_gcode(
@@ -133,9 +131,6 @@ fn adjust_gcode(
     let out_path = response.get_output_filename();
     let out_file = fs::File::create(&out_path)?;
     let mut writer = io::BufWriter::new(out_file);
-
-    add_log_entry("filename", &response.filename);
-    add_log_entry("out_path", &out_path);
 
     struct GCode;
     impl GCode {
@@ -207,8 +202,8 @@ fn adjust_gcode(
     writer.flush()?;
     drop(writer);
 
-    add_log_entry("first_gcode_insertion", first_gcode_insertion);
-    add_log_entry("second_gcode_insertion", second_gcode_insertion);
+    add_log_entry("First gcode insertion", first_gcode_insertion);
+    add_log_entry("Second gcode insertion", second_gcode_insertion);
 
     if !second_gcode_insertion || !first_gcode_insertion {
         let new_path = out_path.replace(".gcode", "-DO-NOT-USE.gcode");
@@ -223,7 +218,7 @@ fn adjust_gcode(
     } else {
         let written = fs::read_to_string(&out_path).unwrap_or_default();
         let has_adjustment = written.contains("SET_GCODE_OFFSET");
-        add_log_entry("new gcode is correct?", has_adjustment);
+        add_log_entry("New gcode is correct?", has_adjustment);
 
         println!("\n{} {}", out_path.b_blue(), "generated!".cyan());
         println!("{}😀", "Goodbye! ".green());
