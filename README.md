@@ -63,6 +63,9 @@ zoffa --silent --input ./Cube.gcode \
   --revert-z-offset-at-layer 2 \
   --z-offset -0.015
 
+# Show version
+zoffa --version
+
 # Show help
 zoffa --help
 ```

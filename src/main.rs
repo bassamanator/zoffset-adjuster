@@ -11,6 +11,7 @@ use std::{fs, path, process};
 #[derive(Parser, Debug)]
 #[command(allow_negative_numbers = true)]
 #[command(name = "zoffset-adjuster")]
+#[command(version)]
 #[command(about = "Adjusts the `z_offset` in gcode files for early layers.")]
 #[command(
     long_about = "Adjusts the `z_offset` in gcode files for early layers. E.g., if you prefer more\nlayer squish for the first layer, and then normal layer squish for subsequent layers.

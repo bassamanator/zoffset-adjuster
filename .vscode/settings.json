@@ -7,8 +7,11 @@
 		"gcode",
 		"gcodes",
 		"Klipper",
+		"kofi",
+		"msvc",
 		"Prusa",
 		"SLIC",
+		"zoffa",
 		"zoffset"
 	],
 }
