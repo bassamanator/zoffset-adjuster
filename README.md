@@ -204,3 +204,7 @@ Please ⭐ star this repository!
 Support [open source](https://en.wikipedia.org/wiki/Open_source).
 
 [<img src=".github/images/support_me_on_kofi_blue.png" height="50" alt='Ko-fi'/>](https://ko-fi.com/bassamanator)
+
+## License
+
+This project is licensed under the Non-Commercial Share-Alike License v1.0. See `LICENSE.md` for details.

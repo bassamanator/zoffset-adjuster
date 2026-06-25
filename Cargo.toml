@@ -2,6 +2,10 @@
 name = "zoffset-adjuster"
 version = "0.7.1"
 edition = "2024"
+license-file = "LICENSE.md"
+repository = "https://github.com/bassamanator/zoffset-adjuster"
+description = "Surgically injects Z offset corrections directly into your gcode."
+keywords = ["3d_printing", "3d_printer", "gcode", "klipper"]
 
 [dependencies]
 inquire = "0.9.4"
