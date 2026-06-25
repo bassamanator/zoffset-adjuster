@@ -1,6 +1,6 @@
 mod helpers;
 mod tests;
-use crate::helpers::add_log_entry;
+use crate::helpers::{add_log_entry, extract_layer_heights_from_slicer_env};
 use clap::Parser;
 use colorize::AnsiColor;
 use env_logger::Env;
@@ -54,19 +54,6 @@ struct Args {
     /// Use only with slicer (Orca Slicer, Prusa Slicer, etc.)
     #[arg(long)]
     slicer: bool,
-}
-
-#[derive(Debug)]
-pub struct SlicerLayerHeights {
-    pub first_layer_height: Option<String>,
-    pub layer_height: Option<String>,
-}
-
-fn extract_layer_heights_from_slicer_env() -> SlicerLayerHeights {
-    SlicerLayerHeights {
-        first_layer_height: std::env::var("SLIC3R_INITIAL_LAYER_PRINT_HEIGHT").ok(),
-        layer_height: std::env::var("SLIC3R_LAYER_HEIGHT").ok(),
-    }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
