@@ -99,7 +99,7 @@ Order of precedence in descending: `provided args` > `slicer environment setting
 Sliced a cube with `first layer height: 0.22mm`, `layer height: 0.12mm`. Want extra squish on the first layer only, reverting at layer 2:
 
 ```
-➜ ./zoffset-adjuster ./Cube.gcode
+➜ zoffa ./Cube.gcode
 
 > Selected file: ./Cube.gcode
 > How much to adjust z_offset by? -0.015 mm
@@ -118,15 +118,17 @@ Goodbye! 😀
 
 ## 📦 Installation
 
-Grab the latest binary for your platform from the [Releases](../../releases/latest) page:
+Grab the latest binary for your platform from the [Releases](../../releases/latest) page.
 
-| Platform | File |
-| --- | --- |
-| 🐧 Linux (x86_64) | `zoffset-adjuster-x86_64-unknown-linux-gnu` |
-| 🪟 Windows (x86_64) | `zoffset-adjuster-x86_64-pc-windows-msvc.exe` |
-| 🍎 macOS (Intel) | `zoffset-adjuster-x86_64-apple-darwin` |
-| 🍎 macOS (Apple Silicon) | `zoffset-adjuster-aarch64-apple-darwin` |
-| <img alt="Raspberry pi logo" src=".github/images/RPI.L.png" width="16" style="vertical-align:middle"> Raspberry Pi 4 / Orange Pi | `zoffset-adjuster-aarch64-unknown-linux-gnu` |
+On `linux` and `macOS`, you'll need to `chmod +x ./zoffa-x86_64-unknown-linux-gnu`
+
+| Platform                                                                                                                         | File                                          |
+| -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| 🐧 Linux (x86_64)                                                                                                                | `zoffa-x86_64-unknown-linux-gnu`   |
+| 🪟 Windows (x86_64)                                                                                                              | `zoffa-x86_64-pc-windows-msvc.exe` |
+| 🍎 macOS (Intel)                                                                                                                 | `zoffa-x86_64-apple-darwin`        |
+| 🍎 macOS (Apple Silicon)                                                                                                         | `zoffa-aarch64-apple-darwin`       |
+| <img alt="Raspberry pi logo" src=".github/images/RPI.L.png" width="16" style="vertical-align:middle"> Raspberry Pi 4 / Orange Pi | `zoffa-aarch64-unknown-linux-gnu`  |
 
 ---
 
@@ -145,20 +147,34 @@ revert_z_offset_at_layer = 2
 
 ## 📋 Notes
 
-| | |
-| --- | --- |
-| 🟢 | Klipper only |
-| 🟢 | Tested with Orca Slicer 2.3.2 |
-| 🟢 | Original `.gcode` is never modified |
-| 🟢 | Sanity checks catch bad inputs |
-| 🔴 | Does **not** work with adaptive layers |
-| 🟡 | Only tested on Linux (for now) |
+|     |                                                      |
+| --- | ---------------------------------------------------- |
+| 🟢  | Klipper                                              |
+| 🔴  | Marlin                                               |
+| 🟡  | Works with Orca Slicer 2.3.2                         |
+|     | ↪🟢via CLI                                           |
+|     | ↪🔴 via slicer                                       |
+| 🟢  | Works with Orca Slicer 2.4.0                         |
+|     | ↪🟢 via CLI                                          |
+|     | ↪🟢 via slicer                                       |
+| 🟢  | Tested with PrusaSlicer 2.9.4                        |
+|     | ↪🟢via CLI                                           |
+|     | ↪🔴 via slicer                                       |
+| 🟢  | Tested with PrusaSlicer 2.9.5                        |
+|     | ↪🟢via CLI                                           |
+|     | ↪🔴 via slicer                                       |
+| 🟢  | Original `.gcode` is never modified                  |
+| 🟡  | Sanity checks catch bad inputs                       |
+|     | ↪🔴 Still can cause irreparable harm to your printer |
+| 🔴  | Does **not** work with adaptive layers               |
+| 🟢  | Tested on Linux (for now)                            |
 
 ---
 
 ## 📝 Todo
 
-- [ ] Add ability to run via Orca Slicer Post-Processing Script section
+- [x] Add ability to run via Orca Slicer Post-Processing Script section
+- [ ] Test on Windows
 
 ---
 
@@ -194,7 +210,7 @@ Example sequence from Orca Slicer 2.3.2 (`first layer: 0.22mm`, `layer height: 0
 git clone https://github.com/bassamanator/zoffset-adjuster.git
 cd zoffset-adjuster
 cargo build --release
-# find binary under ./target/release/ 
+# find binary under ./target/release/
 ```
 
 ## ❤️ Support Me
