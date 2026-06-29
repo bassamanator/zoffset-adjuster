@@ -10,7 +10,8 @@ use std::{fs, path, process};
 
 #[derive(Parser, Debug)]
 #[command(allow_negative_numbers = true)]
-#[command(name = "zoffset-adjuster")]
+#[command(name = "zoffset-adjuster", bin_name = "zoffa")]
+#[command(author = "bassamanator")]
 #[command(version)]
 #[command(about = "Adjusts the `z_offset` in gcode files for early layers.")]
 #[command(
@@ -23,9 +24,9 @@ Positive (+) values elevate the nozzle, increasing the gap between the nozzle an
 "
 )]
 struct Args {
-    /// Path to gcode file
+    /// Path to gcode file or directory
     #[arg(index = 1)]
-    file: Option<String>,
+    path: Option<String>,
 
     /// Path to gcode file
     #[arg(short, long)]
@@ -217,18 +218,26 @@ fn adjust_gcode(
 }
 
 fn validate_args(args: &Args) -> helpers::ZOffsetAdjustmentParams {
-    let file = &args.input.clone().or(args.file.clone());
+    let file = &args.input.clone().or(args.path.clone());
     let file: Option<String> = match file {
         Some(f) => {
             let p = path::Path::new(&f);
-            let valid = if args.slicer {
-                p.is_file()
+
+            let is_unknown_file = p.is_file()
+                && p.extension().and_then(|ext| ext.to_str()) == Some(helpers::GCODE_EXT);
+            let is_gcode_file = p.is_file()
+                && p.extension().and_then(|ext| ext.to_str()) == Some(helpers::GCODE_EXT);
+            let is_path = p.is_dir();
+
+            let is_valid_file_or_path = if args.slicer {
+                is_unknown_file || is_gcode_file
             } else {
                 p.is_file()
                     && p.extension().and_then(|ext| ext.to_str()) == Some(helpers::GCODE_EXT)
+                    || p.is_dir()
             };
 
-            if !valid {
+            if !is_valid_file_or_path {
                 println!("❌ Invalid input. Only `.gcode` files are permissible.");
                 process::exit(0)
             }
@@ -305,5 +314,6 @@ fn validate_args(args: &Args) -> helpers::ZOffsetAdjustmentParams {
             .revert_z_offset_at_layer
             .unwrap_or(settings.revert_z_offset_at_layer),
         slicer: args.slicer,
+        path: None,
     }
 }

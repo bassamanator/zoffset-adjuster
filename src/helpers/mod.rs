@@ -114,6 +114,7 @@ pub struct ZOffsetAdjustmentParams {
     pub layer_height: f32,
     pub revert_z_offset_at_layer: u32,
     pub slicer: bool,
+    pub path: Option<String>,
 }
 
 impl ZOffsetAdjustmentParams {
@@ -124,6 +125,7 @@ impl ZOffsetAdjustmentParams {
         layer_height: f32,
         revert_z_offset_at_layer: u32,
         slicer: bool,
+        path: Option<String>,
     ) -> Self {
         Self {
             filename,
@@ -132,6 +134,7 @@ impl ZOffsetAdjustmentParams {
             layer_height,
             revert_z_offset_at_layer,
             slicer,
+            path,
         }
     }
 
@@ -281,6 +284,7 @@ pub fn ask_user(
         layer_height,
         at_what_layer_to_revert_z_offset,
         false,
+        None,
     ))
 }
 
